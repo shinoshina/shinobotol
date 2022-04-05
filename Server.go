@@ -8,9 +8,15 @@ import (
 
 type messageChecker []string
 
-var gloabalMessage = messageChecker{"nihao", "test2", "test3","baka"}
+var gloabalMessage = messageChecker{"nihao", "test2", "test3", "baka"}
+var gloabalMessageForLearning = messageChecker{"nihao", "test2", "test3", "baka"}
 var messageCounter int = 0
+var messageCounterForLearning int = 0
 
+//define status code
+//1: represents repeat
+//2: learn
+//3: nothing will happen
 func (messageList messageChecker) Check(currentMessage string) bool {
 
 	var counter int = 1
@@ -26,11 +32,30 @@ func (messageList messageChecker) Check(currentMessage string) bool {
 	}
 	if counter >= 4 {
 		messageCounter = 0
-		gloabalMessage = messageChecker{"nihao", "test2", "test3","baka"}
+		gloabalMessage = messageChecker{"nihao", "test2", "test3", "baka"}
 		return true
 	} else {
 		return false
 	}
+}
+func (messageList messageChecker) CheckLearning(currentMessage string) bool {
+
+	gloabalMessageForLearning[messageCounterForLearning] = currentMessage
+	messageCounterForLearning++
+
+	if messageCounterForLearning == 4 {
+		if gloabalMessageForLearning[0] == gloabalMessageForLearning[2] &&
+			gloabalMessageForLearning[1] == gloabalMessageForLearning[3] &&
+			gloabalMessageForLearning[0] != gloabalMessageForLearning[1] {
+
+			messageCounterForLearning = 0
+			gloabalMessageForLearning = messageChecker{"nihao", "test2", "test3", "baka"}
+			return true
+		} else {
+			return false
+		}
+	}
+	return false
 
 }
 
@@ -47,6 +72,16 @@ func MessageHandler(c *gin.Context) {
 
 				c.JSON(200, gin.H{
 					"reply":        mes["raw_message"],
+					"auto_escape":  false,
+					"at_sender":    false,
+					"delete":       false,
+					"kick":         false,
+					"ban":          false,
+					"ban_duration": 0,
+				})
+			} else if gloabalMessage.CheckLearning(mes["raw_message"].(string)) {
+				c.JSON(200, gin.H{
+					"reply":        "nmsl",
 					"auto_escape":  false,
 					"at_sender":    false,
 					"delete":       false,
