@@ -12,7 +12,7 @@ var db *gorm.DB
 var CurrentId int64
 var CrucialId int32
 
-var dsn = "root:zr444251196@tcp(127.0.0.1:3306)/shino_data?charset=utf8mb4&parseTime=True&loc=Local"
+var Dsn = "root:zr444251196@tcp(127.0.0.1:3306)/shino_data?charset=utf8mb4&parseTime=True&loc=Local"
 
 type data struct {
 	ID       int    `gorm:"primary_key;index:id"`
@@ -21,26 +21,23 @@ type data struct {
 }
 
 func Repos(question string,answer string) {
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
-	if err != nil {
-		panic("failed to connect database")
-	}
+	db, index := GetDb()
 	db.Create(&data{ID: int(CurrentId), Question: question, Answer: answer})
 	CurrentId++
 	fmt.Printf("record is recorded\n")
+
+	defer FinishTask(index)
 }
 
 func Find(question string) (ok bool,answer string){
 
 	var dt data
 
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
-	if err != nil {
-		panic("failed to connect database")
-	}
-
+	db, index := GetDb()
+	
 	db.Where("question = ?",question).First(&dt)
 
+	defer FinishTask(index)
 
 	if(dt.ID == 0){
 		return false,""
@@ -57,8 +54,9 @@ func Find(question string) (ok bool,answer string){
 }
 
 func init() {
+	
 
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	db, err := gorm.Open(mysql.Open(Dsn), &gorm.Config{})
 
 	if err != nil {
 		panic("failed to connect database")
@@ -71,6 +69,9 @@ func init() {
 	CurrentId = int64(dt.ID) + 1
 
 	fmt.Printf("anaan %v",CurrentId)
+
+
+	InitDbPool(16)
 
 
 	//   db.Create(&data{ID: 1, Question: "nihao",Answer: "zaijian"})
