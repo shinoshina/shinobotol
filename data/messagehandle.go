@@ -2,9 +2,11 @@ package data
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
+	"gocqserver/requester"
 	"net/http"
-	"gocqserver/poster"
+	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
 type messageChecker []string
@@ -13,7 +15,6 @@ var gloabalMessage = messageChecker{"nihao", "test2", "test3", "baka"}
 var gloabalMessageForLearning = messageChecker{"nihao", "test2", "test3", "baka"}
 var messageCounter int = 0
 var messageCounterForLearning int = 0
-
 
 func (messageList messageChecker) Check(currentMessage string) bool {
 
@@ -63,14 +64,70 @@ func MessageHandler(c *gin.Context) {
 	if mes["post_type"] == "message" {
 		if mes["message_type"] == "group" {
 
-			answerOk,answer := Find(mes["raw_message"].(string))
-			repeatOk := gloabalMessage.Check(mes["raw_message"].(string))
-			learnOk := gloabalMessage.CheckLearning(mes["raw_message"].(string))
+			indexForSpeak := strings.Index(mes["raw_message"].(string), "please read:")
+			indexForImage := strings.Index(mes["raw_message"].(string), "setu!")
 
-            if answerOk {
-				fmt.Println("find answer!")
+			if indexForSpeak == -1 {
+				if indexForImage == -1 {
+
+					answerOk, answer := Find(mes["raw_message"].(string))
+					repeatOk := gloabalMessage.Check(mes["raw_message"].(string))
+					learnOk := gloabalMessage.CheckLearning(mes["raw_message"].(string))
+
+					if answerOk {
+						fmt.Println("find answer!")
+						c.JSON(200, gin.H{
+							"reply":        answer,
+							"auto_escape":  false,
+							"at_sender":    false,
+							"delete":       false,
+							"kick":         false,
+							"ban":          false,
+							"ban_duration": 0,
+						})
+					} else if repeatOk {
+						fmt.Println("repeat!")
+						c.JSON(200, gin.H{
+							"reply":        mes["raw_message"],
+							"auto_escape":  false,
+							"at_sender":    false,
+							"delete":       false,
+							"kick":         false,
+							"ban":          false,
+							"ban_duration": 0,
+						})
+					} else if learnOk {
+						fmt.Println("learn!")
+						Repos(gloabalMessageForLearning[0], gloabalMessageForLearning[1])
+						c.JSON(200, gin.H{
+							"reply":        "recorded!",
+							"auto_escape":  false,
+							"at_sender":    false,
+							"delete":       false,
+							"kick":         false,
+							"ban":          false,
+							"ban_duration": 0,
+						 })//[CQ:image,file=./sese/bukeyisese!.jpg,type=flash]
+					}
+				} else {
+					requester.GetImg()
+					c.JSON(200, gin.H{
+						"reply":        "[CQ:image,file=file:///home/shinoshina/gocode/src/gocqserver/sese/bukeyisese!2.jpg]",
+						"auto_escape":  false,
+						"at_sender":    false,
+						"delete":       false,
+						"kick":         false,
+						"ban":          false,
+						"ban_duration": 0,
+					})
+				}
+			} else {
+				content := mes["raw_message"].(string)[len("please read:"):len(mes["raw_message"].(string))]
+
+				voice := "[CQ:tts,text=" + content + "]"
+
 				c.JSON(200, gin.H{
-					"reply":        answer,
+					"reply":        voice,
 					"auto_escape":  false,
 					"at_sender":    false,
 					"delete":       false,
@@ -78,34 +135,11 @@ func MessageHandler(c *gin.Context) {
 					"ban":          false,
 					"ban_duration": 0,
 				})
-			}else if repeatOk {
-				fmt.Println("repeat!")
-				c.JSON(200, gin.H{
-					"reply":        mes["raw_message"],
-					"auto_escape":  false,
-					"at_sender":    false,
-					"delete":       false,
-					"kick":         false,
-					"ban":          false,
-					"ban_duration": 0,
-				})
-			}else if learnOk {
-				fmt.Println("learn!")
-				Repos(gloabalMessageForLearning[0], gloabalMessageForLearning[1])
-				c.JSON(200, gin.H{
-					"reply":        "recorded!",
-					"auto_escape":  false,
-					"at_sender":    false,
-					"delete":       false,
-					"kick":         false,
-					"ban":          false,
-					"ban_duration": 0,
-				})
+
 			}
 		}
 
 		// 	if gloabalMessage.Check(mes["raw_message"].(string)) {
-
 
 		// 		fmt.Println(mes["raw_message"])
 
@@ -141,9 +175,6 @@ func MessageHandler(c *gin.Context) {
 
 	}
 
-
-
-
 	//group chat poke
 	if mes["post_type"] == "notice" {
 		if mes["notice_type"] == "notify" {
@@ -151,7 +182,7 @@ func MessageHandler(c *gin.Context) {
 				if _, ok := mes["group_id"]; ok {
 					if mes["self_id"] == mes["target_id"] {
 
-						resPoster := poster.RequestPoster{
+						resPoster := requester.RequestPoster{
 							Client: &http.Client{},
 						}
 						resPoster.PostPoke(mes)

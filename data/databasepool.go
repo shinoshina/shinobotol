@@ -10,6 +10,7 @@ type DbConnection struct {
 	state bool
 }
 
+
 var Dbpool []DbConnection
 var currentIndex int16
 var idleDbNum int16
@@ -26,6 +27,7 @@ func InitDbPool(num int16) {
 		Dbpool[i].db, _ = gorm.Open(mysql.Open(Dsn), &gorm.Config{})
 		Dbpool[i].state = false
 	}
+
 }
 
 func GetDb() (*gorm.DB, int16) {
@@ -33,13 +35,12 @@ func GetDb() (*gorm.DB, int16) {
 	if idleDbNum > 0 {
 		defer updateState()
 
-		for ; currentIndex < defaultDbNum&& Dbpool[currentIndex].state ; currentIndex++ {
+		for ; currentIndex < defaultDbNum && Dbpool[currentIndex].state; currentIndex++ {
 		}
 		return Dbpool[currentIndex].db, currentIndex
 	} else {
 		return nil, -1
 	}
-
 }
 
 func updateState() {
