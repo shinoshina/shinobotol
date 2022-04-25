@@ -35,19 +35,19 @@ type RequestPoster struct {
 func (rp RequestPoster) PostPoke(mes map[string]interface{}) {
 	var group_id int64 = int64(mes["group_id"].(float64))
 	id := strconv.FormatInt(int64(mes["sender_id"].(float64)), 10)
-	poke := "[CQ:poke,qq=" + id + "]"
-	msg := MsgPostGroup{
-		Group_id:    group_id,
-		Message:     poke,
-		Auto_escape: false,
+
+	if id != "2037310389" {
+		poke := "[CQ:poke,qq=" + id + "]"
+		msg := MsgPostGroup{
+			Group_id:    group_id,
+			Message:     poke,
+			Auto_escape: false,
+		}
+		jsonStr, _ := json.Marshal(msg)
+		resp, err := rp.Client.Post("http://127.0.0.1:5700/send_msg", "application/json", bytes.NewBuffer(jsonStr))
+		if err != nil {
+			panic(err)
+		}
+		defer resp.Body.Close()
 	}
-	jsonStr, _ := json.Marshal(msg)
-	resp, err := rp.Client.Post("http://127.0.0.1:5700/send_msg", "application/json", bytes.NewBuffer(jsonStr))
-	if err != nil {
-		panic(err)
-	}
-	defer resp.Body.Close()
 }
-
-
-
