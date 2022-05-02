@@ -9,15 +9,16 @@ var (
 	user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36"
 )
 
-
-// url 
+// url
 var (
 
 	// everyday recommend page
 	everydayRecommendPage = "https://www.pixiv.net/ranking.php?mode=daily_r18&content=illust"
 
-	//proxy
-	proxyUrl,_ =  url.Parse("http://127.0.0.1:5890")
+	// proxy
+	// change it often
+	// wsl net gateway
+	proxyUrl, _ = url.Parse("http://172.28.16.1:5890")
 )
 
 // regex rule
@@ -25,7 +26,7 @@ var (
 var (
 
 	// raw jpg rule
-	// 
+	//
 	rawJpgRule = `data-src="(?P<src>https://i.pximg.net/c/\d{1,}x\d{1,}/img-master/img/\d{4}/\d{2}/\d{2}/\d{2}/\d{2}/\d{2}/\d{8}_p0_master1200.jpg)"`
 )
 
