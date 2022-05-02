@@ -25,6 +25,7 @@ func init() {
 	SubrouterMes["Normal"] = NormalMessageHandler
 	SubrouterMes["Image"] = ImgHandler
 	SubrouterMes["Speak"] = SpeakHandler
+	SubrouterMes["ShinoSpeak"] = ShinoSpeakHandler
 
 	SubrouterOther["Poke"] = PokeHandler
 
@@ -64,12 +65,15 @@ func SplitRawMessage(rawMessage string) (subType string) {
 	var _subType string
 	indexForSpeak := strings.Index(rawMessage, "please read:")
 	indexForImage := strings.Index(rawMessage, "setu!")
+	indexForShinoSpeak := strings.Index(rawMessage,"kaka!")
 
 	if indexForSpeak != -1 {
 		_subType = "Speak"
 	} else if indexForImage != -1 {
 		_subType = "Image"
-	} else {
+	} else if indexForShinoSpeak != -1{
+		_subType = "ShinoSpeak"
+	}else{
 		_subType = "Normal"
 	}
 

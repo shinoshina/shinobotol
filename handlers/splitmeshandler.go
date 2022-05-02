@@ -2,11 +2,11 @@ package handlers
 
 import (
 	"github.com/gin-gonic/gin"
-	"gocqserver/requester"
+	"gocqserver/requester/pv"
 )
 
 func ImgHandler(c *gin.Context, message map[string]interface{}) {
-	requester.GetImg()
+	pv.GetImg()
 	c.JSON(200, gin.H{
 		"reply":        "[CQ:image,file=file:///home/shinoshina/gocode/src/gocqserver/sese/bukeyisese!2.jpg]",
 		"auto_escape":  false,
@@ -16,6 +16,7 @@ func ImgHandler(c *gin.Context, message map[string]interface{}) {
 		"ban":          false,
 		"ban_duration": 0,
 	})
+	pv.GetHTML()
 
 }
 
@@ -34,5 +35,21 @@ func SpeakHandler(c *gin.Context, message map[string]interface{}) {
 		"ban":          false,
 		"ban_duration": 0,
 	})
+
+}
+
+func ShinoSpeakHandler(c *gin.Context, message map[string]interface{} ){
+
+	c.JSON(200, gin.H{
+		"reply":        "[CQ:record,file=file:///home/shinoshina/gocode/src/gocqserver/audio/shinobu894.mp3]",
+		"auto_escape":  false,
+		"at_sender":    false,
+		"delete":       false,
+		"kick":         false,
+		"ban":          false,
+		"ban_duration": 0,
+	})
+
+
 
 }
