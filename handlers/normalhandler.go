@@ -87,19 +87,30 @@ func Check(currentMessage string) bool {
 }
 func CheckLearning(currentMessage string) bool {
 
-	gloabalMessageForLearning[messageCounterForLearning] = currentMessage
-	messageCounterForLearning++
+	// gloabalMessageForLearning[messageCounterForLearning] = currentMessage
+	// messageCounterForLearning++
 
-	if messageCounterForLearning == 4 {
-		messageCounterForLearning = 0
-		if gloabalMessageForLearning[0] == gloabalMessageForLearning[2] &&
+	// if messageCounterForLearning == 4 {
+	// 	messageCounterForLearning = 0
+	// 	if gloabalMessageForLearning[0] == gloabalMessageForLearning[2] &&
+	// 		gloabalMessageForLearning[1] == gloabalMessageForLearning[3] &&
+	// 		gloabalMessageForLearning[0] != gloabalMessageForLearning[1] {
+	// 		return true
+	// 	} else {
+	// 		return false
+	// 	}
+	// }
+	// return false
+	for i :=0;i<3;i++{
+		gloabalMessageForLearning[i] = gloabalMessageForLearning[i+1]
+	}
+	gloabalMessageForLearning[3] = currentMessage
+	if gloabalMessageForLearning[0] == gloabalMessageForLearning[2] &&
 			gloabalMessageForLearning[1] == gloabalMessageForLearning[3] &&
 			gloabalMessageForLearning[0] != gloabalMessageForLearning[1] {
 			return true
 		} else {
 			return false
 		}
-	}
-	return false
 
 }
