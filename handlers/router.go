@@ -45,10 +45,16 @@ func SplitMessageType(message map[string]interface{}) (mainType string, subType 
 	var _subType string
 	var _validPost bool = true
 
-	if message["post_type"].(string) == "message" {
+	post_type := message["post_type"].(string)
+	var msg string
+	if post_type == "message" {
+		msg = message["raw_message"].(string)
+	}
+
+	if post_type == "message" {
 		_mainType = "Message"
-		_subType = SplitRawMessage(message["raw_message"].(string))
-	} else if message["post_type"].(string) == "meta_event" {
+		_subType = SplitRawMessage(msg)
+	} else if post_type == "meta_event" {
 		_validPost = false
 	} else {
 		fmt.Printf("herer question")
@@ -62,22 +68,21 @@ func SplitMessageType(message map[string]interface{}) (mainType string, subType 
 
 func SplitRawMessage(rawMessage string) (subType string) {
 
-	var _subType string
-	indexForSpeak := strings.Index(rawMessage, "please read:")
+	indexForSpeak := strings.Index(rawMessage, "read:")
 	indexForImage := strings.Index(rawMessage, "setu!")
-	indexForShinoSpeak := strings.Index(rawMessage,"kaka!")
+	indexForShinoSpeak := strings.Index(rawMessage, "kaka!")
 
 	if indexForSpeak != -1 {
-		_subType = "Speak"
+		subType = "Speak"
 	} else if indexForImage != -1 {
-		_subType = "Image"
-	} else if indexForShinoSpeak != -1{
-		_subType = "ShinoSpeak"
-	}else{
-		_subType = "Normal"
+		subType = "Image"
+	} else if indexForShinoSpeak != -1 {
+		subType = "ShinoSpeak"
+	} else {
+		subType = "Normal"
 	}
 
-	return _subType
+	return
 
 }
 
@@ -89,4 +94,3 @@ func SplitOther(message map[string]interface{}) (subType string) {
 
 	return _subType
 }
-

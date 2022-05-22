@@ -1,8 +1,10 @@
 package handlers
 
 import (
-	"github.com/gin-gonic/gin"
 	"gocqserver/requester/pv"
+	"gocqserver/senda"
+
+	"github.com/gin-gonic/gin"
 )
 
 func ImgHandler(c *gin.Context, message map[string]interface{}) {
@@ -22,19 +24,11 @@ func ImgHandler(c *gin.Context, message map[string]interface{}) {
 
 func SpeakHandler(c *gin.Context, message map[string]interface{}) {
 
-	content := message["raw_message"].(string)[len("please read:"):len(message["raw_message"].(string))]
+	content := message["raw_message"].(string)[len("read:"):len(message["raw_message"].(string))]
 
 	voice := "[CQ:tts,text=" + content + "]"
 
-	c.JSON(200, gin.H{
-		"reply":        voice,
-		"auto_escape":  false,
-		"at_sender":    false,
-		"delete":       false,
-		"kick":         false,
-		"ban":          false,
-		"ban_duration": 0,
-	})
+	senda.SendMessage(voice,message["group_id"].(float64))
 
 }
 

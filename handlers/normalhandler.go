@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"gocqserver/data"
+	"gocqserver/senda"
 
 	"github.com/gin-gonic/gin"
 )
@@ -22,44 +23,23 @@ var (
 //yes yes this!!!
 func NormalMessageHandler(c *gin.Context, message map[string]interface{}) {
 
-	answerOk, answer := data.Find(message["raw_message"].(string))
-	repeatOk := Check(message["raw_message"].(string))
-	learnOk := CheckLearning(message["raw_message"].(string))
+
+	msg := message["raw_message"].(string)
+	group_id := message["group_id"].(float64)
+	answerOk, answer := data.Find(msg)
+	repeatOk := Check(msg)
+	learnOk := CheckLearning(msg)
 
 	if answerOk {
 		fmt.Println("find answer!")
-		c.JSON(200, gin.H{
-			"reply":        answer,
-			"auto_escape":  false,
-			"at_sender":    false,
-			"delete":       false,
-			"kick":         false,
-			"ban":          false,
-			"ban_duration": 0,
-		})
+		senda.SendMessage(answer,group_id)
 	} else if repeatOk {
 		fmt.Println("repeat!")
-		c.JSON(200, gin.H{
-			"reply":        message["raw_message"],
-			"auto_escape":  false,
-			"at_sender":    false,
-			"delete":       false,
-			"kick":         false,
-			"ban":          false,
-			"ban_duration": 0,
-		})
+		senda.SendMessage(msg,group_id)
 	} else if learnOk {
 		fmt.Println("learn!")
 		data.Repos(gloabalMessageForLearning[0], gloabalMessageForLearning[1])
-		c.JSON(200, gin.H{
-			"reply":        "recorded!",
-			"auto_escape":  false,
-			"at_sender":    false,
-			"delete":       false,
-			"kick":         false,
-			"ban":          false,
-			"ban_duration": 0,
-		}) //[CQ:image,file=./sese/bukeyisese!.jpg,type=flash]
+		senda.SendMessage(msg,group_id)
 	}
 
 }
