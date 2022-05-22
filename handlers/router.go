@@ -26,6 +26,7 @@ func init() {
 	SubrouterMes["Image"] = ImgHandler
 	SubrouterMes["Speak"] = SpeakHandler
 	SubrouterMes["ShinoSpeak"] = ShinoSpeakHandler
+	SubrouterMes["Remove"] = RemoveHandler
 
 	SubrouterOther["Poke"] = PokeHandler
 
@@ -49,6 +50,7 @@ func SplitMessageType(message map[string]interface{}) (mainType string, subType 
 	var msg string
 	if post_type == "message" {
 		msg = message["raw_message"].(string)
+		fmt.Print(msg)
 	}
 
 	if post_type == "message" {
@@ -71,6 +73,15 @@ func SplitRawMessage(rawMessage string) (subType string) {
 	indexForSpeak := strings.Index(rawMessage, "read:")
 	indexForImage := strings.Index(rawMessage, "setu!")
 	indexForShinoSpeak := strings.Index(rawMessage, "kaka!")
+
+	okForRemove := (strings.Contains(rawMessage,"[CQ:reply,") && 
+	strings.Contains(rawMessage,"bukeyi!") && 
+	strings.Contains(rawMessage,"[CQ:at,qq=2037310389]"))
+
+	if okForRemove {
+		subType = "Remove"
+		return 
+	}
 
 	if indexForSpeak != -1 {
 		subType = "Speak"

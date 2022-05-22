@@ -16,8 +16,8 @@ var Dsn = "root:zr444251196@tcp(127.0.0.1:3306)/shino_data?charset=utf8mb4&parse
 
 type data struct {
 	ID       int    `gorm:"primary_key;index:id"`
-	Question string `gorm:"type:varchar(100);not null;index:question"`
-	Answer   string `gorm:"type:varchar(100);not null;index:answer"`
+	Question string `gorm:"type:varchar(256);not null;index:question"`
+	Answer   string `gorm:"type:varchar(256);not null;index:answer"`
 }
 
 func Repos(question string,answer string) {
@@ -45,10 +45,37 @@ func Find(question string) (ok bool,answer string){
 		return true,dt.Answer
 	}
 
+}
+
+func RemoveRaw(str string)(ok bool){
 
 
+	var dt data
 
+	db,index := GetDb()
 
+	db.Where("answer = ?",str).Delete(&dt)
+
+	fmt.Println(dt)
+
+	defer FinishTask(index)
+
+	return true;
+}
+
+func RemoveImg(str string)(ok bool){
+
+	var dt data
+
+	db,index := GetDb()
+
+	db.Where("answer like ?","%"+str+"%").Delete(&dt)
+
+	fmt.Println(dt)
+
+	defer FinishTask(index)
+
+	return true;
 
 
 }

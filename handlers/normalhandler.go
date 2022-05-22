@@ -20,6 +20,12 @@ var (
 	messageCounterForLearning int = 0
 )
 
+
+func ResetGlobalMessage(){
+
+	gloabalMessageForRepeat       = []string{"nihao", "test2", "test3", "baka"}
+	gloabalMessageForLearning =  []string{"nihao", "test2", "test3", "baka"}
+}
 //yes yes this!!!
 func NormalMessageHandler(c *gin.Context, message map[string]interface{}) {
 
@@ -94,3 +100,5 @@ func CheckLearning(currentMessage string) bool {
 		}
 
 }
+
+
