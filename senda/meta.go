@@ -58,6 +58,7 @@ func GetMessage(id int32)(string){
 	defer resp.Body.Close()
 
 
+	fmt.Println(string(body))
 	msgRule := regexp.MustCompile(`"message":"(?P<raw_message>.*?)",`)
 	result := msgRule.FindStringSubmatch(string(body))
 

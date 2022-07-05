@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"gocqserver/data"
 	"gocqserver/requester/pv"
 	"gocqserver/senda"
@@ -91,6 +92,8 @@ func RemoveHandler(c *gin.Context, message map[string]interface{}) {
 
 	}
 	ResetGlobalMessage()
+
+	fmt.Printf("shit enter %v\n",str)
 
 	senda.SendMessage("emmm",message["group_id"].(float64))
 	data.RemoveRaw(str)

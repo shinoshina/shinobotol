@@ -18,8 +18,4 @@ func MessageHandler(c *gin.Context) {
 		fmt.Println("gocq end check aliving")
 	}
 
-	
-
-
-
 }

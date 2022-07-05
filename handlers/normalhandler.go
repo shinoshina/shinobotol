@@ -29,7 +29,6 @@ func ResetGlobalMessage(){
 //yes yes this!!!
 func NormalMessageHandler(c *gin.Context, message map[string]interface{}) {
 
-
 	msg := message["raw_message"].(string)
 	group_id := message["group_id"].(float64)
 	answerOk, answer := data.Find(msg)
@@ -37,7 +36,7 @@ func NormalMessageHandler(c *gin.Context, message map[string]interface{}) {
 	learnOk := CheckLearning(msg)
 
 	if answerOk {
-		fmt.Println("find answer!")
+		fmt.Printf("find answer! %v\n",answer)
 		senda.SendMessage(answer,group_id)
 	} else if repeatOk {
 		fmt.Println("repeat!")
