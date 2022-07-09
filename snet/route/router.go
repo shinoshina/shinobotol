@@ -2,12 +2,12 @@ package route
 
 type Router struct{
 	m MessageSet
-	a Activity
+	a ActivitySet
 }
 
 func(r *Router) RegisterSet(om MessageSet){
 
 }
-func(r *Router) RegisterActivity(oa Activity){
+func(r *Router) RegisterActivity(oa ActivitySet){
 
 }
