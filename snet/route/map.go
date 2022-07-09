@@ -2,11 +2,11 @@ package route
 
 import "fmt"
 
+type DataMap map[string]interface{}
 
+type MessageSet map[string]func(d DataMap)()
 
-type MessageSet map[string]func(string)()
-
-func DefaultHandler(s string){
+func DefaultHandler(d DataMap){
 	fmt.Println("hai hai hai!")
 }
 func NewMessageSet()(m MessageSet){
@@ -14,7 +14,7 @@ func NewMessageSet()(m MessageSet){
 	m["/"] = DefaultHandler
 	return
 }
-func(m MessageSet) On_Message(raw string,handler func(string)()){
+func(m MessageSet) OnMessage(raw string,handler func(d DataMap)()){
 	m[raw] = handler
 }
 
