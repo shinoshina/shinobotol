@@ -11,7 +11,7 @@ type (
 		mr map[string]func(d DataMap)
 	}
 
-	ActivitySet map[string]func(d DataMap)
+	NoticeSet map[string]func(d DataMap)
 )
 
 func DefaultHandler(d DataMap) {
@@ -29,7 +29,7 @@ func NewDataMap() (d DataMap) {
 	d = make(DataMap)
 	return
 }
-func (ms MessageSet) OnMessage(r string, mode string, handler func(d DataMap)) {
+func (ms *MessageSet) OnMessage(r string, mode string, handler func(d DataMap)) {
 	if mode == "all" {
 		ms.ma[r] = handler
 	} else if mode == "part" {
@@ -38,12 +38,14 @@ func (ms MessageSet) OnMessage(r string, mode string, handler func(d DataMap)) {
 		ms.mr[r] = handler
 	}
 }
+func(ms *MessageSet) handle(d DataMap){
 
-func NewActivitySet() (a ActivitySet) {
-	a = make(ActivitySet)
+}
+func NewActivitySet() (n NoticeSet) {
+	n = make(NoticeSet)
 	return
 }
-func (a ActivitySet) OnEvent(tp string, handler func(d DataMap)) {
+func (a NoticeSet) OnEvent(tp string, handler func(d DataMap)) {
 	a[tp] = handler
 }
 
