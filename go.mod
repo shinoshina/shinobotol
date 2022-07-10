@@ -1,4 +1,4 @@
-module gocqserver
+module shinobot
 
 go 1.18
 
