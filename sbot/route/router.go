@@ -18,7 +18,9 @@ func (r *Router) LoadPlugin(p *Plugin) {
 	for key, handler := range p.ms.mr {
 		r.ms.mr[key] = handler
 	}
-	r.ms.ma["/"] = p.ms.ma["/"]
+	if h, ok := p.ms.ma["/"]; ok {
+		r.ms.ma["/"] = h
+	}
 
 	for key, handler := range p.es {
 		r.es[key] = handler
@@ -38,7 +40,7 @@ func (r *Router) Handle(d DataMap) {
 	} else if pt == "message" {
 		r.ms.handle(d)
 	} else if pt == "notice" {
-		
+
 		not := d["notice_type"].(string)
 		if not == "notify" {
 			subt := d["sub_type"].(string)
