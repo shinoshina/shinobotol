@@ -1,4 +1,4 @@
-package snet
+package sbot
 
 import (
 	"shinobot/sbot/route"
@@ -13,7 +13,7 @@ type Sbot struct {
 
 func NewBot() (sb *Sbot) {
 	sb = new(Sbot)
-	sb.b = new(route.Router)
+	sb.b = route.NewRouter()
 	sb.r = gin.Default()
 	return
 }
@@ -22,11 +22,14 @@ func (sb *Sbot)mainHandler(c *gin.Context) {
 
 	d := route.NewDataMap()
 	c.BindJSON(&d)
-
 	sb.b.Handle(d)
 
 }
 func (sb *Sbot) Run() {
 	sb.r.POST("/", sb.mainHandler)
-	sb.r.Run("5701")
+	sb.r.Run(":5701")
+}
+
+func (sb *Sbot) LoadPlugin(ms *route.MessageSet){
+	sb.b.LoadPlugin(ms)
 }

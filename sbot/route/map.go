@@ -1,6 +1,9 @@
 package route
 
-import "fmt"
+import (
+	"strings"
+	"shinobot/sbot/request"
+)
 
 type (
 	DataMap map[string]interface{}
@@ -15,7 +18,8 @@ type (
 )
 
 func DefaultHandler(d DataMap) {
-	fmt.Println("hai hai hai!")
+	gi := d["group_id"].(float64)
+	request.SendMessage("gei ye pa!",gi)
 }
 func NewMessageSet() (ms *MessageSet) {
 	ms = new(MessageSet)
@@ -38,10 +42,27 @@ func (ms *MessageSet) OnMessage(r string, mode string, handler func(d DataMap)) 
 		ms.mr[r] = handler
 	}
 }
-func(ms *MessageSet) handle(d DataMap){
+func (ms *MessageSet) handle(d DataMap) {
+
+	msg := d["raw_message"].(string)
+	_, ok := ms.ma[msg]
+	if ok {
+		ms.ma[msg](d)
+		return
+	} else {
+		for key, _ := range ms.mp {
+			if strings.Contains(msg,key){
+				ms.mp[key](d)
+				return
+			}
+		}
+		// regex handle
+		// wo bu hui xie hahah cnm
+	}
+	ms.ma["/"](d)
 
 }
-func NewActivitySet() (n NoticeSet) {
+func NewNoticeSet() (n NoticeSet) {
 	n = make(NoticeSet)
 	return
 }
@@ -61,7 +82,7 @@ func (d DataMap) SpiltType() (pt string, pmt string, pst string) {
 		if pmt == "group" {
 			pst = d["sub_type"].(string)
 			return
-		}else {
+		} else {
 			pt = "disallow_private"
 			pst = "hei"
 			return

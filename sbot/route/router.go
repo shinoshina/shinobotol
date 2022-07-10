@@ -4,14 +4,30 @@ import "fmt"
 
 type Router struct{
 	m *MessageSet
-	n *NoticeSet
+	n NoticeSet
 }
 
-func(r *Router) RegisterSet(om MessageSet){
+func(r *Router) LoadPlugin(ms* MessageSet){
 
+	for key,handler := range ms.ma{
+		r.m.ma[key] = handler
+	}
+	for key,handler := range ms.mp{
+		r.m.mp[key] = handler
+	}
+	for key,handler := range ms.mr{
+		r.m.mr[key] = handler
+	}
+	r.m.ma["/"] = ms.ma["/"]
 }
 func(r *Router) RegisterActivity(on NoticeSet){
 
+}
+func NewRouter()(r *Router){
+	r = new(Router)
+	r.m = NewMessageSet()
+	r.n = NewNoticeSet()
+	return
 }
 func (r *Router) Handle(d DataMap){
 
@@ -25,5 +41,8 @@ func (r *Router) Handle(d DataMap){
 	}else{
 		
 	}
+	fmt.Println(pt)
+	fmt.Println(pmt)
+	fmt.Println(pst)
 
 }
