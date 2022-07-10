@@ -30,6 +30,6 @@ func (sb *Sbot) Run() {
 	sb.r.Run(":5701")
 }
 
-func (sb *Sbot) LoadPlugin(ms *route.MessageSet){
-	sb.b.LoadPlugin(ms)
+func (sb *Sbot) LoadPlugin(p *route.Plugin){
+	sb.b.LoadPlugin(p)
 }

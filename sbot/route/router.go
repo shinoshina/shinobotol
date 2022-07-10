@@ -2,44 +2,52 @@ package route
 
 import "fmt"
 
-type Router struct{
-	m *MessageSet
-	n NoticeSet
+type Router struct {
+	ms *MessageSet
+	es EventSet
 }
 
-func(r *Router) LoadPlugin(ms* MessageSet){
+func (r *Router) LoadPlugin(p *Plugin) {
 
-	for key,handler := range ms.ma{
-		r.m.ma[key] = handler
+	for key, handler := range p.ms.ma {
+		r.ms.ma[key] = handler
 	}
-	for key,handler := range ms.mp{
-		r.m.mp[key] = handler
+	for key, handler := range p.ms.mp {
+		r.ms.mp[key] = handler
 	}
-	for key,handler := range ms.mr{
-		r.m.mr[key] = handler
+	for key, handler := range p.ms.mr {
+		r.ms.mr[key] = handler
 	}
-	r.m.ma["/"] = ms.ma["/"]
-}
-func(r *Router) RegisterActivity(on NoticeSet){
+	r.ms.ma["/"] = p.ms.ma["/"]
 
+	for key, handler := range p.es {
+		r.es[key] = handler
+	}
 }
-func NewRouter()(r *Router){
+func NewRouter() (r *Router) {
 	r = new(Router)
-	r.m = NewMessageSet()
-	r.n = NewNoticeSet()
+	r.ms = NewMessageSet()
+	r.es = NewEventSet()
 	return
 }
-func (r *Router) Handle(d DataMap){
+func (r *Router) Handle(d DataMap) {
 
-	pt,pmt,pst := d.SpiltType()
-	if(pt == "meta"){
+	pt, pmt, pst := d.SpiltType()
+	if pt == "meta" {
 		fmt.Println("meta_event : check living")
-	}else if(pt == "message"){
-		r.m.handle(d)
-	}else if(pt == "notice"){
-
-	}else{
+	} else if pt == "message" {
+		r.ms.handle(d)
+	} else if pt == "notice" {
 		
+		not := d["notice_type"].(string)
+		if not == "notify" {
+			subt := d["sub_type"].(string)
+			r.es.handle(subt, d)
+		} else {
+			r.es.handle(not, d)
+		}
+	} else {
+
 	}
 	fmt.Println(pt)
 	fmt.Println(pmt)

@@ -14,7 +14,7 @@ type (
 		mr map[string]func(d DataMap)
 	}
 
-	NoticeSet map[string]func(d DataMap)
+	EventSet map[string]func(d DataMap)
 )
 
 func DefaultHandler(d DataMap) {
@@ -33,7 +33,7 @@ func NewDataMap() (d DataMap) {
 	d = make(DataMap)
 	return
 }
-func (ms *MessageSet) OnMessage(r string, mode string, handler func(d DataMap)) {
+func (ms *MessageSet) onMessage(r string, mode string, handler func(d DataMap)) {
 	if mode == "all" {
 		ms.ma[r] = handler
 	} else if mode == "part" {
@@ -62,14 +62,16 @@ func (ms *MessageSet) handle(d DataMap) {
 	ms.ma["/"](d)
 
 }
-func NewNoticeSet() (n NoticeSet) {
-	n = make(NoticeSet)
+func NewEventSet() (es EventSet) {
+	es = make(EventSet)
 	return
 }
-func (a NoticeSet) OnEvent(tp string, handler func(d DataMap)) {
-	a[tp] = handler
+func (es EventSet) onEvent(ev string, handler func(d DataMap)) {
+	es[ev] = handler
 }
-
+func (es EventSet) handle(ev string ,d DataMap){
+	es[ev](d)
+}
 func (d DataMap) SpiltType() (pt string, pmt string, pst string) {
 
 	pt = d["post_type"].(string)
