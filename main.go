@@ -6,6 +6,8 @@ import (
 	"shinobot/sbot"
 
 	"shinobot/plugin/test"
+
+	"shinobot/plugin/shino"
 )
 func main(){
 
@@ -13,6 +15,8 @@ func main(){
 
 	a.LoadPlugin(dplugin.Export())
 	a.LoadPlugin(test.Export())
+	a.LoadPlugin(shino.Export())
+
 
 	a.Run()
 }

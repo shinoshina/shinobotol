@@ -10,6 +10,7 @@ func Export() (p *route.Plugin) {
 	p.OnMessage("multi plugin test","part",func(d route.DataMap) {
 		request.SendMessage("multi plugin test",d["group_id"].(float64))
 	})
+	
 	return
 
 }
