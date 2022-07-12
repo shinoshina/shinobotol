@@ -1,8 +1,10 @@
 package route
 
 import (
-	"strings"
+	"fmt"
+	"regexp"
 	"shinobot/sbot/request"
+	"strings"
 )
 
 type (
@@ -19,7 +21,7 @@ type (
 
 func DefaultHandler(d DataMap) {
 	gi := d["group_id"].(float64)
-	request.SendMessage("gei ye pa!",gi)
+	request.SendMessage("gei ye pa!", gi)
 }
 func NewMessageSet() (ms *MessageSet) {
 	ms = new(MessageSet)
@@ -51,13 +53,31 @@ func (ms *MessageSet) handle(d DataMap) {
 		return
 	} else {
 		for key, _ := range ms.mp {
-			if strings.Contains(msg,key){
+			if strings.Contains(msg, key) {
 				ms.mp[key](d)
 				return
 			}
 		}
-		// regex handle
-		// wo bu hui xie hahah cnm
+		for key, _ := range ms.mr {
+			rule := regexp.MustCompile(key)
+			result := rule.FindStringSubmatch(msg)
+			if result != nil {
+				group := rule.SubexpNames()
+				if len(group) > 1 {
+					vmap := make(map[string]string)
+					for i, name := range group {
+						if i != 0 && name != "" {
+							vmap[name] = result[i]
+						}
+					}
+					d["group_value"] = vmap
+				}
+				ms.mr[key](d)
+				return
+			} else {
+				fmt.Println("here round no match")
+			}
+		}
 	}
 	ms.ma["/"](d)
 
@@ -69,7 +89,7 @@ func NewEventSet() (es EventSet) {
 func (es EventSet) onEvent(ev string, handler func(d DataMap)) {
 	es[ev] = handler
 }
-func (es EventSet) handle(ev string ,d DataMap){
+func (es EventSet) handle(ev string, d DataMap) {
 	es[ev](d)
 }
 func (d DataMap) SpiltType() (pt string, pmt string, pst string) {
