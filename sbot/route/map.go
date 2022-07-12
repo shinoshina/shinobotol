@@ -80,7 +80,6 @@ func (ms *MessageSet) handle(d DataMap) {
 		}
 	}
 	ms.ma["/"](d)
-
 }
 func NewEventSet() (es EventSet) {
 	es = make(EventSet)
@@ -118,3 +117,21 @@ func (d DataMap) SpiltType() (pt string, pmt string, pst string) {
 	}
 	return
 }
+
+func (d DataMap) GroupID() (id float64) {
+	if v, ok := d["group_id"].(float64); ok {
+		id = v
+	}else{
+		id = -1
+	}
+	return
+}
+func (d DataMap) Message()(msg string){
+	if v, ok := d["raw_message"].(string); ok {
+		msg = v
+	}else{
+		msg = "wrong operation!!"
+	}
+	return
+}
+

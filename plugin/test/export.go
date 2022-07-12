@@ -18,7 +18,9 @@ func Export() (p *route.Plugin) {
 		for k, v := range vmap {
 			request.SendMessage("key: "+k+"  "+"value: "+"  "+v, d["group_id"].(float64))
 		}
-
+	})
+	p.OnMessage("TEST","all",func(d route.DataMap) {
+		request.SendMessage(d.Message(),d.GroupID())
 	})
 	return
 
