@@ -13,7 +13,7 @@ func Export() (p *route.Plugin) {
 	p.OnMessage(`^regex test`, "regex", func(d route.DataMap) {
 		request.SendMessage("regex test", d["group_id"].(float64))
 	})
-	p.OnMessage(`name:(?P<name>.*?) age:(?P<age>.*)`, "regex", func(d route.DataMap) {
+	p.OnMessage(`^name:(?P<name>.*?) age:(?P<age>.*)`, "regex", func(d route.DataMap) {
 		vmap := d["group_value"].(map[string](string))
 		for k, v := range vmap {
 			request.SendMessage("key: "+k+"  "+"value: "+"  "+v, d["group_id"].(float64))
