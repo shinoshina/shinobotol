@@ -6,7 +6,7 @@ import (
 )
 
 func Export() (p *route.Plugin) {
-	p = route.NewPlugin()
+	p = route.NewPlugin("test")
 	p.OnMessage("multi plugin test", "part", func(d route.DataMap) {
 		request.SendMessage("multi plugin test", d["group_id"].(float64))
 	})
@@ -19,8 +19,8 @@ func Export() (p *route.Plugin) {
 			request.SendMessage("key: "+k+"  "+"value: "+"  "+v, d["group_id"].(float64))
 		}
 	})
-	p.OnMessage("TEST","all",func(d route.DataMap) {
-		request.SendMessage(d.Message(),d.GroupID())
+	p.OnMessage("TEST", "all", func(d route.DataMap) {
+		request.SendMessage(d.Message(), d.GroupID())
 	})
 	return
 

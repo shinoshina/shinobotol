@@ -7,7 +7,7 @@ import (
 
 func Export()(p *route.Plugin){
 
-	p = route.NewPlugin()
+	p = route.NewPlugin("shinoaudio")
 	p.OnMessage("小忍","all",intro)
 	p.OnMessage("[CQ:at,qq=2037310389]","all",intro)
 	p.OnMessage("kaka","all",kaka1)

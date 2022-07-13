@@ -6,7 +6,8 @@ import (
 )
 
 func Export() (p *route.Plugin) {
-	p = route.NewPlugin()
+	p = route.NewPlugin("default")
+
 	p.OnMessage("/", "all", NormalMessageHandler)
 	p.OnMessage(`^read:(?P<content>.*)`, "regex", SpeakHandler)
 	p.OnMessage("ceshi", "part", func(d route.DataMap) {

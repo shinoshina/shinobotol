@@ -1,6 +1,7 @@
 package main
 
 import (
+	"shinobot/plugin/bilibili"
 	"shinobot/plugin/dplugin"
 	"shinobot/plugin/leetcode"
 
@@ -18,6 +19,7 @@ func main(){
 	a.LoadPlugin(test.Export())
 	a.LoadPlugin(shino.Export())
 	a.LoadPlugin(leetcode.Export())
+	a.LoadPlugin(bilibili.Export())
 
 
 	a.Run()
