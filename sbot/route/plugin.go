@@ -84,6 +84,7 @@ func (p *Plugin) OnBoot(handler func()) {
 		if p.state == "shut" {
 			fmt.Println("nothing happen")
 		} else if p.state == "loaded" {
+			fmt.Println("handler start")
 			handler()
 		}
 
@@ -112,14 +113,17 @@ func (p *Plugin) StartTask(name string) {
 	}
 }
 func (pt *PeriodicalTask) start() {
+	pt.ctx, pt.cancel = context.WithCancel(context.Background())
 	go func() {
 		if pt.state == "off" {
 			pt.state = "on"
 			for {
 				select {
 				case <-pt.ctx.Done():
+					fmt.Println("直接结束啦？")
 					return
 				default:
+					fmt.Println("没有啊")
 					pt.task()
 				}
 			}
@@ -130,6 +134,7 @@ func (pt *PeriodicalTask) start() {
 }
 func (pt *PeriodicalTask) stop() {
 	if pt.state == "on" {
+		pt.state = "off"
 		pt.cancel()
 	} else if pt.state == "off" {
 		return
