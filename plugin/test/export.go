@@ -3,6 +3,7 @@ package test
 import (
 	"shinobot/sbot/request"
 	"shinobot/sbot/route"
+	"time"
 )
 
 func Export() (p *route.Plugin) {
@@ -29,6 +30,15 @@ func Export() (p *route.Plugin) {
 		}else if pluginState == "shut"{
 			request.SendMessage("testonshut",d.GroupID())
 		}
+	})
+
+	p.OnTick("定时任务1",func() {
+		timer := time.NewTimer(5*time.Second)
+		<-timer.C
+		request.SendMessage("定时任务测试",1012330112)
+	})
+	p.OnBoot(func() {
+		p.StartTask("定时任务1")
 	})
 	return
 

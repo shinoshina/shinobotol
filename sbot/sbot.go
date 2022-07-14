@@ -1,6 +1,7 @@
 package sbot
 
 import (
+	"fmt"
 	"shinobot/sbot/route"
 	"time"
 
@@ -10,14 +11,16 @@ import (
 type Sbot struct {
 	r     *route.Router
 	e     *gin.Engine
-	boots []func()
+	bh func()
 }
 
 func NewBot() (sb *Sbot) {
 	sb = new(Sbot)
 	sb.r = route.NewRouter()
 	sb.e = gin.Default()
-	sb.boots = make([]func(), 1)
+	sb.bh = func() {
+		fmt.Println("免费啦啦啦啦啦")
+	}
 	return
 }
 
@@ -30,17 +33,12 @@ func (sb *Sbot) mainHandler(c *gin.Context) {
 }
 func (sb *Sbot) Run() {
 	sb.e.POST("/", sb.mainHandler)
-	for _, h := range sb.boots {
-		if h != nil {
-			go setTimeval(5, h)
-		}
-	}
+	go setTimeval(5,sb.bh)
 	sb.e.Run(":5701")
 }
 
 func (sb *Sbot) LoadPlugin(p *route.Plugin) {
 	sb.r.LoadPlugin(p)
-	sb.boots = append(sb.boots, p.Boot())
 }
 func setTimeval(sec int64, h func()) {
 	timer := time.NewTimer(time.Duration(sec) * time.Second)

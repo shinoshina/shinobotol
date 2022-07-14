@@ -3,9 +3,10 @@ package route
 import "fmt"
 
 type Router struct {
-	ms *MessageSet
-	es EventSet
-	ps map[string](*Plugin)
+	ms     *MessageSet
+	es     EventSet
+	ps     map[string](*Plugin)
+	booted bool
 }
 
 func (r *Router) LoadPlugin(p *Plugin) {
@@ -90,6 +91,13 @@ func (r *Router) Handle(d DataMap) {
 
 	pt, pmt, pst := d.SpiltType()
 	if pt == "meta" {
+		if !r.booted {
+			for _, p := range r.ps {
+				 p.bh()
+			}
+			r.booted = true
+			fmt.Println("plugin first booted")
+		}
 		fmt.Println("meta_event : check living")
 	} else if pt == "message" {
 		r.ms.handle(d)
