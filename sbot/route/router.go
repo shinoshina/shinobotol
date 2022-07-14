@@ -85,15 +85,16 @@ func NewRouter() (r *Router) {
 	r.ms = NewMessageSet()
 	r.es = NewEventSet()
 	r.ps = make(map[string]*Plugin)
+	r.booted = false
 	return
 }
 func (r *Router) Handle(d DataMap) {
 
 	pt, pmt, pst := d.SpiltType()
-	if pt == "meta" {
+	if pt == "meta_event" {
 		if !r.booted {
 			for _, p := range r.ps {
-				 p.bh()
+				p.bh()
 			}
 			r.booted = true
 			fmt.Println("plugin first booted")

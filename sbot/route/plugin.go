@@ -38,7 +38,17 @@ func NewPlugin(n string, defaultState string) (p *Plugin) {
 	p.ptm = make(map[string]*PeriodicalTask)
 	p.bh = func() {
 		fmt.Println("plugin: " + p.name + " onboot\n" + "initial state: " + p.state)
+		if p.state == "shut" {
+			fmt.Println("nothing happen")
+		} else if p.state == "loaded" {
+			fmt.Println("default handler start")
+			for k, v := range p.ptm {
+				fmt.Println(k+"start")
+				v.start()
+			}
+		}
 	}
+
 	p.trigger = Trigger{
 		kload: p.name + "load",
 		kshut: p.name + "shut",
@@ -87,7 +97,6 @@ func (p *Plugin) OnBoot(handler func()) {
 			fmt.Println("handler start")
 			handler()
 		}
-
 	}
 }
 func (p *Plugin) Boot() func() {
