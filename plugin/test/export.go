@@ -6,7 +6,7 @@ import (
 )
 
 func Export() (p *route.Plugin) {
-	p = route.NewPlugin("test")
+	p = route.NewPlugin("test","shut")
 	p.OnMessage("multi plugin test", "part", func(d route.DataMap) {
 		request.SendMessage("multi plugin test", d["group_id"].(float64))
 	})
@@ -21,6 +21,14 @@ func Export() (p *route.Plugin) {
 	})
 	p.OnMessage("TEST", "all", func(d route.DataMap) {
 		request.SendMessage(d.Message(), d.GroupID())
+	})
+
+	p.OnTrigger("testload","testshut",func(d route.DataMap, pluginState string) {
+		if pluginState == "loaded" {
+			request.SendMessage("testonloaded",d.GroupID())
+		}else if pluginState == "shut"{
+			request.SendMessage("testonshut",d.GroupID())
+		}
 	})
 	return
 

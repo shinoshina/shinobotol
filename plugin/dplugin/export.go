@@ -6,7 +6,7 @@ import (
 )
 
 func Export() (p *route.Plugin) {
-	p = route.NewPlugin("default")
+	p = route.NewPlugin("default","loaded")
 
 	p.OnMessage("/", "all", NormalMessageHandler)
 	p.OnMessage(`^read:(?P<content>.*)`, "regex", SpeakHandler)
