@@ -32,13 +32,13 @@ func Export() (p *route.Plugin) {
 		}
 	})
 
-	p.OnTick("定时任务1",func() {
+	p.OnTick("定时任务",func() {
 		timer := time.NewTimer(5*time.Second)
 		<-timer.C
-		request.SendMessage("定时任务测试",1012330112)
+		request.SendMessage("定时任务",1012330112)
 	})
 	p.OnBoot(func() {
-		p.StartTask("定时任务1")
+		p.StartTask("定时任务")
 	})
 	return
 
