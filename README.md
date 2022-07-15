@@ -89,5 +89,6 @@ docker rm -v containerid
 * ##### leetcode每日一题提醒
 * ##### 不可以sese（其实可以
 * ##### shinobu语音包！ （从副音轨里裁的
-### TO NOT DO :sweet_smile:
+* ##### bilibili 直播推送
+### TO NOT DO  :heart_eyes:
 * ##### 就不写
