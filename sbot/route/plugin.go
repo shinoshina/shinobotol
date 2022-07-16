@@ -1,9 +1,9 @@
 package route
 
 import (
-	"context"
 	"fmt"
 	"shinobot/sbot/request"
+	"shinobot/sbot/tick"
 )
 
 type Plugin struct {
@@ -13,14 +13,7 @@ type Plugin struct {
 	name    string
 	trigger Trigger
 	state   string
-	ptm     map[string](*PeriodicalTask)
-}
-type PeriodicalTask struct {
-	name   string
-	task   func()
-	state  string
-	ctx    context.Context
-	cancel context.CancelFunc
+	ctm     map[string](*tick.CronTask)
 }
 
 type Trigger struct {
@@ -35,16 +28,16 @@ func NewPlugin(n string, defaultState string) (p *Plugin) {
 	p.ms = NewMessageSet()
 	p.es = NewEventSet()
 	p.state = defaultState
-	p.ptm = make(map[string]*PeriodicalTask)
+	p.ctm = make(map[string]*tick.CronTask)
 	p.bh = func() {
 		fmt.Println("plugin: " + p.name + " onboot\n" + "initial state: " + p.state)
 		if p.state == "shut" {
 			fmt.Println("nothing happen")
 		} else if p.state == "loaded" {
 			fmt.Println("default handler start")
-			for k, v := range p.ptm {
-				fmt.Println(k+"start")
-				v.start()
+			for k, v := range p.ctm {
+				fmt.Println(k + "start")
+				v.Start()
 			}
 		}
 	}
@@ -55,7 +48,7 @@ func NewPlugin(n string, defaultState string) (p *Plugin) {
 		th: func(d DataMap, pluginState string) {
 			if pluginState == "shut" {
 				request.SendMessage(p.name+"onshut", d.GroupID())
-				p.ShutDownAllPTask()
+				p.ShutDownAllCronTask()
 			} else if pluginState == "loaded" {
 				request.SendMessage(p.name+"onloaded", d.GroupID())
 				p.bh()
@@ -64,9 +57,10 @@ func NewPlugin(n string, defaultState string) (p *Plugin) {
 	}
 	return
 }
-func (p *Plugin) OnTick(name string, task func()) {
+func (p *Plugin) OnTick(name string, task func(*tick.Timer)) {
 
-	p.newPeriodicalTask(name, task)
+	ct := tick.NewCronTask(name, task)
+	p.ctm[name] = ct
 
 }
 func (p *Plugin) OnTrigger(keyLoad string, keyShut string, hook func(d DataMap, pluginState string)) {
@@ -74,7 +68,7 @@ func (p *Plugin) OnTrigger(keyLoad string, keyShut string, hook func(d DataMap, 
 	p.trigger.kshut = keyShut
 	p.trigger.th = func(d DataMap, pluginState string) {
 		if pluginState == "shut" {
-			p.ShutDownAllPTask()
+			p.ShutDownAllCronTask()
 		} else if pluginState == "loaded" {
 			p.bh()
 		}
@@ -102,50 +96,13 @@ func (p *Plugin) OnBoot(handler func()) {
 func (p *Plugin) Boot() func() {
 	return p.bh
 }
-func (p *Plugin) ShutDownAllPTask() {
-	for _, v := range p.ptm {
-		v.stop()
+func (p *Plugin) ShutDownAllCronTask() {
+	for _, v := range p.ctm {
+		v.Stop()
 	}
-}
-func (p *Plugin) newPeriodicalTask(name string, task func()) (pt *PeriodicalTask) {
-	pt = new(PeriodicalTask)
-	pt.name = name
-	pt.task = task
-	pt.state = "off"
-	pt.ctx, pt.cancel = context.WithCancel(context.Background())
-	p.ptm[name] = pt
-	return
 }
 func (p *Plugin) StartTask(name string) {
-	if _, ok := p.ptm[name]; ok {
-		p.ptm[name].start()
-	}
-}
-func (pt *PeriodicalTask) start() {
-	pt.ctx, pt.cancel = context.WithCancel(context.Background())
-	go func() {
-		if pt.state == "off" {
-			pt.state = "on"
-			for {
-				select {
-				case <-pt.ctx.Done():
-					fmt.Println("直接结束啦？")
-					return
-				default:
-					fmt.Println("没有啊")
-					pt.task()
-				}
-			}
-		} else if pt.state == "on" {
-			return
-		}
-	}()
-}
-func (pt *PeriodicalTask) stop() {
-	if pt.state == "on" {
-		pt.state = "off"
-		pt.cancel()
-	} else if pt.state == "off" {
-		return
+	if _, ok := p.ctm[name]; ok {
+		p.ctm[name].Start()
 	}
 }
