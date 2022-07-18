@@ -1,13 +1,11 @@
 package leetcode
 
 import (
-	"bufio"
 	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"os"
 	"shinobot/sbot/request"
 	"shinobot/sbot/route"
 )
@@ -15,6 +13,7 @@ import (
 var (
 	url    = "https://leetcode.cn/graphql/"
 	method = "POST"
+	purl   = "https://leetcode.cn/problems/"
 )
 
 func getDailyName() (name string, id string) {
@@ -85,22 +84,28 @@ func dailyQuestionInfo(d route.DataMap) {
 
 	var qinfo questionInfo
 	json.Unmarshal(body, &qinfo)
-	fmt.Println(qinfo.Data.Question.TranslatedTitle)
-	fmt.Println(qinfo.Data.Question.TranslatedContent)
 
-	request.SendMessage(qinfo.Data.Question.TranslatedTitle, d.GroupID())
-	// request.SendMessage(qinfo.Data.Question.TranslatedContent,d.GroupID())
-	filePath := "assets/leetcode/question.txt"
-	file, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE, 0666)
-	if err != nil {
-		fmt.Println("fail to open", err)
+	tags := ""
+	for _,v := range qinfo.Data.Question.TopicTags {
+		tags += v.TranslatedName
+		tags += " "
 	}
+	message := "今日题目: "+qinfo.Data.Question.TranslatedTitle + "\n"+  
+	           "难度: "+qinfo.Data.Question.Difficulty + "\n" +
+               "tags: " + tags + "\n" +
+			   "详情这里哦: " + purl + name + "/"
+	request.SendMessage(message, d.GroupID())
+	// filePath := "assets/leetcode/question.txt"
+	// file, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE, 0666)
+	// if err != nil {
+	// 	fmt.Println("fail to open", err)
+	// }
 
-	defer file.Close()
-	write := bufio.NewWriter(file)
+	// defer file.Close()
+	// write := bufio.NewWriter(file)
 
-	write.WriteString(qinfo.Data.Question.TranslatedContent)
+	// write.WriteString(qinfo.Data.Question.TranslatedContent)
 
-	write.Flush()
+	// write.Flush()
 
 }

@@ -2,7 +2,6 @@ package tick
 
 import (
 	"context"
-	"fmt"
 )
 
 type CronTask struct {
@@ -30,10 +29,8 @@ func (ct *CronTask) Start() {
 			for {
 				select {
 				case <-ct.ctx.Done():
-					fmt.Println("直接结束啦？")
 					return
 				default:
-					fmt.Println("没有啊")
 					ct.task(ct.timer)
 				}
 			}
