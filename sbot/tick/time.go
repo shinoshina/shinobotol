@@ -1,20 +1,39 @@
 package tick
 
-import "time"
+import (
+	"strconv"
+	"strings"
+	"time"
+)
+
+var (
+	format = "2006-01-02 15:04:05"
+)
+
+const (
+	INITIAL        = 0
+	NO_SCHEDULED   = 1
+	WAIT_SCHEDULED = 2
+	WAIT_INTERVAL  = 3
+	READY          = 4
+)
 
 type timer struct {
-	schedules       []schedule
-	currentSchedule int
+	pit        []string
+	pitOrigin  string
+	pitTime    time.Time
+	fixd       duration
+	minCheckPt int
+	mode       int
+	rtimer     *time.Timer
+	noInterval bool
+	noSchedule bool
 }
-type pitUnit struct {
+
+type duration struct {
 	sec  int
 	min  int
 	hour int
-	day  int
-}
-type schedule struct {
-	pit pitUnit 
-	duration pitUnit
 }
 
 func CurrentTime() (ct string) {
@@ -26,16 +45,118 @@ func CurrentTime() (ct string) {
 
 	return
 }
-func newTimer()(t *timer){
+func newTimer() (t *timer) {
 	t = new(timer)
-	t.schedules = make([]schedule, 1)
-	t.currentSchedule = -1
+	t.pit = make([]string, 3)
+	t.mode = WAIT_SCHEDULED
+	t.minCheckPt = 3
 	return
 }
-func(t *timer)fromSchedule(raw string){
 
-	// sc := schedule{}
-	// fu,iu := handleRaw(raw)
-    
+//好屎好似好事好诗
+func (t *timer) fromSchedule(raw string) {
+	fu, iu := handleRaw(raw)
+	for i := 0; i < 3; i++ {
+		t.pit[i] = fu[i]
+	}
+	t.pitOrigin = strings.Split(time.Now().Local().Format(format), " ")[0] + " " + t.pit[2] + ":" + t.pit[1] + ":" + t.pit[0]
+	if iu[0]+iu[1]+iu[2] == 0 {
+		t.noInterval = true
+	} else {
+		t.fixd.sec = iu[0]
+		t.fixd.min = iu[1]
+		t.fixd.hour = iu[2]
+		t.noInterval = false
+	}
+	if t.pit[2] == "*" {
+		t.minCheckPt = 2
+	}
+	if t.pit[1] == "*" {
+		t.minCheckPt = 1
+	}
+	if t.pit[0] == "*" {
+		if t.minCheckPt == 1 {
+			t.noSchedule = true
+		}
+	} else {
+		t.noSchedule = false
+	}
+}
+func (t *timer) waitSchedule() {
+	if t.mode == WAIT_SCHEDULED {
+		t.resetPitTimeRaw()
+		if t.pitTime.After(time.Now().Local()) {
+			t.rtimer = time.NewTimer(t.pitTime.Sub(time.Now().Local()))
+			<-t.rtimer.C
+		}
+		t.resetPitTimeComple()
+		t.mode = WAIT_INTERVAL
+	} else {
+		if !t.pitTime.After(time.Now().Local().Add(time.Duration(t.fixd.hour)*time.Hour + time.Duration(t.fixd.min)*
+			time.Minute + time.Duration(t.fixd.sec)*time.Second)) {
+			t.rtimer = time.NewTimer(t.pitTime.Sub(time.Now().Local()))
+			<-t.rtimer.C
+			t.resetPitTimeRaw()
+			t.mode = WAIT_SCHEDULED
+		} else {
+			t.mode = WAIT_INTERVAL
+		}
+	}
+
+}
+func (t *timer) waitInterval() {
+	t.rtimer = time.NewTimer(time.Duration(t.fixd.hour)*time.Hour + time.Duration(t.fixd.min)*
+		time.Minute + time.Duration(t.fixd.sec)*time.Second)
+	<-t.rtimer.C
+}
+
+//初次鉴定:屎
+func (t *timer) wait() {
+
+	if t.mode == WAIT_SCHEDULED {
+		if !t.noSchedule {
+			t.waitSchedule()
+		}else {
+			t.mode = WAIT_INTERVAL
+		}
+	}
+	if t.mode == WAIT_INTERVAL {
+		if !t.noInterval {
+			t.waitInterval()
+		}
+		t.mode = READY
+	}
+}
+
+func fromStringValue(tick int) string {
+	if tick < 10 {
+		return "0" + strconv.Itoa(tick)
+	} else {
+		return strconv.Itoa(tick)
+	}
+}
+
+func (t *timer) resetPitTimeComple() {
+	if t.minCheckPt == 3 {
+		t.pitTime.Add(24*time.Hour - time.Duration(t.pitTime.Hour()))
+	} else if t.minCheckPt == 2 {
+		t.pitTime.Add(60*time.Minute - time.Duration(t.pitTime.Minute()))
+	} else if t.minCheckPt == 1 {
+		t.pitTime.Add(60*time.Second - time.Duration(t.pitTime.Second()))
+	}
+}
+
+func (t *timer) resetPitTimeRaw() {
+	pitSchedulestr := strings.Split(time.Now().Local().Format(format), " ")[0] + " "
+	if t.minCheckPt == 3 {
+		pitSchedulestr += t.pit[2] + ":" + t.pit[1] + ":" + t.pit[0]
+	} else if t.minCheckPt == 2 {
+		pitSchedulestr += fromStringValue(time.Now().Local().Hour()) +
+			":" + t.pit[1] + ":" + t.pit[0]
+	} else if t.minCheckPt == 1 {
+		pitSchedulestr += fromStringValue(time.Now().Local().Hour()) +
+			":" + fromStringValue(time.Now().Local().Minute()) + ":" + t.pit[0]
+	}
+	t.pitTime, _ = time.ParseInLocation(format, pitSchedulestr, time.Local)
 
 }

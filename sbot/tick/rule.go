@@ -11,15 +11,15 @@ import (
 //  /1  /30   /5   *   *   *   //
 type (
 	raw          []string
-	intervalUnit []int
-	fromUnit     []int
+	intervalUnits []int
+	fromUnits     []string
 
 	proRule struct {
 		units []unit
 	}
 
 	unit struct {
-		from     int
+		from     string
 		interval int
 	}
 )
@@ -35,16 +35,11 @@ func completion(r raw) (pr proRule) {
 	for i, v := range r {
 		runit := strings.Split(v, "/")
 		if len(runit) == 1 {
-			if runit[0] == "*" {
-				pr.units[i].from = -1
-			} else {
-				pr.units[i].from, _ = strconv.Atoi(runit[0])
-			}
+			//judge from num legal
+			pr.units[i].from = runit[0]
 			pr.units[i].interval = -1
 		} else {
-			if runit[0] == "*" || runit[0] == "" {
-				pr.units[i].from = -1
-			}
+			pr.units[i].from = runit[0]
 			inum, err := strconv.Atoi(runit[1])
 			if err != nil {
 				fmt.Println(err)
@@ -57,30 +52,26 @@ func completion(r raw) (pr proRule) {
 	return
 }
 
-func interval(pr proRule) intervalUnit {
-	iu := make(intervalUnit, 6)
+func interval(pr proRule) intervalUnits {
+	iu := make(intervalUnits, 6)
 	for i := len(pr.units) - 1; i >= 0; i-- {
 		if pr.units[i].interval != -1 {
 			iu[i] = pr.units[i].interval
-		}else {
-			iu[i] = -1
+		} else {
+			iu[i] = 0
 		}
 	}
 	return iu
 }
-func from(pr proRule) fromUnit {
+func from(pr proRule) fromUnits {
 
-	fu := make(fromUnit, 6)
+	fu := make(fromUnits, 6)
 	for i := len(pr.units) - 1; i >= 0; i-- {
-		if pr.units[i].from != -1 {
-			fu[i] = pr.units[i].from
-		}else {
-			fu[i] = -1
-		}
+		fu[i] = pr.units[i].from
 	}
 	return fu
 }
-func handleRaw(raw string) (fromUnit, intervalUnit) {
+func handleRaw(raw string) (fromUnits, intervalUnits) {
 	pr := completion(retrive(raw))
 	fu, iu := from(pr), interval(pr)
 	return fu, iu

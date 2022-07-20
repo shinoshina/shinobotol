@@ -4,15 +4,14 @@ import (
 	"context"
 )
 
-
 type CronTask struct {
-	name   string
-	task   func()
-	state  string
+	name  string
+	task  func()
+	state string
 
-	rules   []string
-	ctx    context.Context
-	cancel context.CancelFunc
+	t          *timer
+	ctx        context.Context
+	cancel     context.CancelFunc
 	autoBooted bool
 }
 
@@ -22,13 +21,12 @@ func NewCronTask(name string, task func()) (ct *CronTask) {
 	ct.task = task
 	ct.state = "off"
 	ct.ctx, ct.cancel = context.WithCancel(context.Background())
-
+	ct.t = newTimer()
 	ct.autoBooted = true
-	ct.rules = make([]string, 1)
 	return
 }
-func(ct *CronTask) AddRule(rule string){
-	ct.rules = append(ct.rules, rule)
+func (ct *CronTask) AddRule(raw string) {
+	ct.t.fromSchedule(raw)
 }
 func (ct *CronTask) Start() {
 	ct.ctx, ct.cancel = context.WithCancel(context.Background())
@@ -40,7 +38,13 @@ func (ct *CronTask) Start() {
 				case <-ct.ctx.Done():
 					return
 				default:
-					ct.task()
+                    ct.t.wait()
+					if ct.t.mode == READY {
+						// no need to use state ,just use boolean
+						// dont wanna mention exceeD
+						ct.task()
+						ct.t.mode = WAIT_INTERVAL
+					}
 				}
 			}
 		} else if ct.state == "on" {

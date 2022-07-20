@@ -3,11 +3,11 @@ package test
 import (
 	"shinobot/sbot/request"
 	"shinobot/sbot/route"
-	"time"
+	"shinobot/sbot/tick"
 )
 
 func Export() (p *route.Plugin) {
-	p = route.NewPlugin("test","shut")
+	p = route.NewPlugin("test", "shut")
 	p.OnMessage("multi plugin test", "part", func(d route.DataMap) {
 		request.SendMessage("multi plugin test", d["group_id"].(float64))
 	})
@@ -23,23 +23,33 @@ func Export() (p *route.Plugin) {
 	p.OnMessage("TEST", "all", func(d route.DataMap) {
 		request.SendMessage(d.Message(), d.GroupID())
 	})
+	p.OnMessage("定时任务", "all", func(d route.DataMap) {
 
-	p.OnTrigger("testload","testshut",func(d route.DataMap, pluginState string) {
+		ct := tick.NewCronTask("wuyuzi", func() {
+			request.SendMessage(d.Message(), d.GroupID())
+		})
+		ct.AddRule("10/20 41 * * * *")
+
+		ct.Start()
+
+	})
+
+	p.OnTrigger("testload", "testshut", func(d route.DataMap, pluginState string) {
 		if pluginState == "loaded" {
-			request.SendMessage("testonloaded",d.GroupID())
-		}else if pluginState == "shut"{
-			request.SendMessage("testonshut",d.GroupID())
+			request.SendMessage("testonloaded", d.GroupID())
+		} else if pluginState == "shut" {
+			request.SendMessage("testonshut", d.GroupID())
 		}
 	})
 
-	p.OnTick("定时任务",func() {
-		timer := time.NewTimer(5*time.Second)
-		<-timer.C
-		request.SendMessage("定时任务",1012330112)
-	})
-	p.OnBoot(func() {
-		p.StartTask("定时任务")
-	})
+	// p.OnTick("定时任务", func() {
+	// 	timer := time.NewTimer(5 * time.Second)
+	// 	<-timer.C
+	// 	request.SendMessage("定时任务", 1012330112)
+	// })
+	// p.OnBoot(func() {
+	// 	p.StartTask("定时任务")
+	// })
 	return
 
 }

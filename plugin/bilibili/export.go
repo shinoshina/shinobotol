@@ -7,6 +7,6 @@ func Export()(p *route.Plugin){
 
 	p = route.NewPlugin("bilibili","loaded")
 	p.OnMessage(`^关注主播喵:(?P<mid>.*)`,"regex",Subscribe)
-	p.OnTick("hha",Tick)
+	// p.OnTick("hha",Tick)
 	return
 }
