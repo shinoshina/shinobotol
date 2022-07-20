@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"shinobot/sbot/request"
 	"shinobot/sbot/route"
-	"shinobot/sbot/tick"
 	"sync"
 	"time"
 )
@@ -45,7 +44,7 @@ func Subscribe(d route.DataMap) {
 	fmt.Println(a[mid])
 	request.SendMessage(mid, d.GroupID())
 }
-func Tick(t *tick.Timer) {
+func Tick() {
 	timer := time.NewTimer(2 * time.Second)
 	<-timer.C
 	mutex.Lock()

@@ -4,22 +4,31 @@ import (
 	"context"
 )
 
+
 type CronTask struct {
 	name   string
-	task   func(*Timer)
+	task   func()
 	state  string
+
+	rules   []string
 	ctx    context.Context
 	cancel context.CancelFunc
-
-	timer *Timer
+	autoBooted bool
 }
-func NewCronTask(name string, task func( t *Timer)) (ct *CronTask) {
+
+func NewCronTask(name string, task func()) (ct *CronTask) {
 	ct = new(CronTask)
 	ct.name = name
 	ct.task = task
 	ct.state = "off"
 	ct.ctx, ct.cancel = context.WithCancel(context.Background())
+
+	ct.autoBooted = true
+	ct.rules = make([]string, 1)
 	return
+}
+func(ct *CronTask) AddRule(rule string){
+	ct.rules = append(ct.rules, rule)
 }
 func (ct *CronTask) Start() {
 	ct.ctx, ct.cancel = context.WithCancel(context.Background())
@@ -31,7 +40,7 @@ func (ct *CronTask) Start() {
 				case <-ct.ctx.Done():
 					return
 				default:
-					ct.task(ct.timer)
+					ct.task()
 				}
 			}
 		} else if ct.state == "on" {

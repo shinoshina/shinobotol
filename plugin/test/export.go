@@ -3,7 +3,6 @@ package test
 import (
 	"shinobot/sbot/request"
 	"shinobot/sbot/route"
-	"shinobot/sbot/tick"
 	"time"
 )
 
@@ -33,7 +32,7 @@ func Export() (p *route.Plugin) {
 		}
 	})
 
-	p.OnTick("定时任务",func(t *tick.Timer) {
+	p.OnTick("定时任务",func() {
 		timer := time.NewTimer(5*time.Second)
 		<-timer.C
 		request.SendMessage("定时任务",1012330112)

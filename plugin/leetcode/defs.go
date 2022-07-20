@@ -95,17 +95,4 @@ func dailyQuestionInfo(d route.DataMap) {
                "tags: " + tags + "\n" +
 			   "详情这里哦: " + purl + name + "/"
 	request.SendMessage(message, d.GroupID())
-	// filePath := "assets/leetcode/question.txt"
-	// file, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE, 0666)
-	// if err != nil {
-	// 	fmt.Println("fail to open", err)
-	// }
-
-	// defer file.Close()
-	// write := bufio.NewWriter(file)
-
-	// write.WriteString(qinfo.Data.Question.TranslatedContent)
-
-	// write.Flush()
-
 }
