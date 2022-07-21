@@ -1,6 +1,7 @@
 package tick
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -83,28 +84,30 @@ func (t *timer) fromSchedule(raw string) {
 	}
 }
 func (t *timer) waitSchedule() {
-	if t.mode == WAIT_SCHEDULED {
-		t.resetPitTimeRaw()
-		if t.pitTime.After(time.Now().Local()) {
-			t.rtimer = time.NewTimer(t.pitTime.Sub(time.Now().Local()))
-			<-t.rtimer.C
-		}
-		t.resetPitTimeComple()
-		t.mode = WAIT_INTERVAL
-	} else {
-		if !t.pitTime.After(time.Now().Local().Add(time.Duration(t.fixd.hour)*time.Hour + time.Duration(t.fixd.min)*
-			time.Minute + time.Duration(t.fixd.sec)*time.Second)) {
-			t.rtimer = time.NewTimer(t.pitTime.Sub(time.Now().Local()))
-			<-t.rtimer.C
-			t.resetPitTimeRaw()
-			t.mode = WAIT_SCHEDULED
-		} else {
-			t.mode = WAIT_INTERVAL
-		}
+
+	t.resetPitTimeRaw()
+	if t.pitTime.After(time.Now().Local()) {
+		fmt.Println("waiting schedule :")
+		fmt.Println(t.pitTime.Sub(time.Now().Local()))
+		t.rtimer = time.NewTimer(t.pitTime.Sub(time.Now().Local()))
+		<-t.rtimer.C
 	}
 
 }
 func (t *timer) waitInterval() {
+
+	if !t.noInterval && !t.noSchedule {
+		t.resetPitTimeComple()
+		fmt.Println("judge current time for interval job:")
+		fmt.Println(t.pitTime.Local())
+		if !t.pitTime.After(time.Now().Local().Add(time.Duration(t.fixd.hour)*time.Hour + time.Duration(t.fixd.min)*
+			time.Minute + time.Duration(t.fixd.sec)*time.Second)) {
+			fmt.Println("no free execute chance :")
+			fmt.Println(t.pitTime.Sub(time.Now().Local()))
+			t.rtimer = time.NewTimer(t.pitTime.Sub(time.Now().Local()))
+			<-t.rtimer.C
+		}
+	}
 	t.rtimer = time.NewTimer(time.Duration(t.fixd.hour)*time.Hour + time.Duration(t.fixd.min)*
 		time.Minute + time.Duration(t.fixd.sec)*time.Second)
 	<-t.rtimer.C
@@ -113,18 +116,11 @@ func (t *timer) waitInterval() {
 //初次鉴定:屎
 func (t *timer) wait() {
 
-	if t.mode == WAIT_SCHEDULED {
-		if !t.noSchedule {
-			t.waitSchedule()
-		}else {
-			t.mode = WAIT_INTERVAL
-		}
+	if !t.noSchedule {
+		t.waitSchedule()
 	}
-	if t.mode == WAIT_INTERVAL {
-		if !t.noInterval {
-			t.waitInterval()
-		}
-		t.mode = READY
+	if !t.noInterval {
+		t.waitInterval()
 	}
 }
 
@@ -138,11 +134,13 @@ func fromStringValue(tick int) string {
 
 func (t *timer) resetPitTimeComple() {
 	if t.minCheckPt == 3 {
-		t.pitTime.Add(24*time.Hour - time.Duration(t.pitTime.Hour()))
+		t.pitTime = t.pitTime.Add(24*time.Hour - time.Duration(t.pitTime.Hour()))
+		fmt.Println("nihao")
+		fmt.Println(t.pitTime)
 	} else if t.minCheckPt == 2 {
-		t.pitTime.Add(60*time.Minute - time.Duration(t.pitTime.Minute()))
+		t.pitTime = t.pitTime.Add(60*time.Minute - time.Duration(t.pitTime.Minute()))
 	} else if t.minCheckPt == 1 {
-		t.pitTime.Add(60*time.Second - time.Duration(t.pitTime.Second()))
+		t.pitTime = t.pitTime.Add(60*time.Second - time.Duration(t.pitTime.Second()))
 	}
 }
 

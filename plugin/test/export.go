@@ -7,7 +7,7 @@ import (
 )
 
 func Export() (p *route.Plugin) {
-	p = route.NewPlugin("test", "shut")
+	p = route.NewPlugin("test", "loaded")
 	p.OnMessage("multi plugin test", "part", func(d route.DataMap) {
 		request.SendMessage("multi plugin test", d["group_id"].(float64))
 	})
@@ -25,10 +25,9 @@ func Export() (p *route.Plugin) {
 	})
 	p.OnMessage("定时任务", "all", func(d route.DataMap) {
 
-		ct := tick.NewCronTask("wuyuzi", func() {
+		ct := tick.NewCronTask("wuyuzi", "*/5 * * * * *", func() {
 			request.SendMessage(d.Message(), d.GroupID())
 		})
-		ct.AddRule("10/20 41 * * * *")
 
 		ct.Start()
 

@@ -45,11 +45,9 @@ func TestInitTimer(t *testing.T) {
 }
 
 func TestTaskLoop(t *testing.T) {
-	ct := tick.NewCronTask("wuyuzi", func() {
+	ct := tick.NewCronTask("wuyuzi", "10/3 23 20 * * *", func() {
 		fmt.Println("测试")
 	})
-	ct.AddRule("10/3 23 20 * * *")
-
 	ct.Start()
 
 }
