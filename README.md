@@ -43,10 +43,8 @@ p.OnMessage(`^name:(?P<name>.*?) age:(?P<age>.*)`, "regex", func(d route.DataMap
 ```
 注册定时任务
 ```go
-p.OnTick("定时任务",func() {
-	timer := time.NewTimer(5*time.Second)
-	<-timer.C
-	request.SendMessage("定时任务",1012330112)
+p.OnTick("hello",tick.Every(1*tick.Day).At("11:58"),func() {
+	request.SendMessage("hello ha", groupid)
 })
 ```
 （伪）动态加载卸载插件

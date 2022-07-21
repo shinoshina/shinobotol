@@ -31,6 +31,10 @@ func Export() (p *route.Plugin) {
 		ct.Start()
 	})
 
+	p.OnTick("hello", tick.Every(1*tick.Day).At("11:58"), func() {
+		request.SendMessage("hello ha", 1012330112)
+	})
+
 	p.OnTrigger("testload", "testshut", func(d route.DataMap, pluginState string) {
 		if pluginState == "loaded" {
 			request.SendMessage("testonloaded", d.GroupID())
