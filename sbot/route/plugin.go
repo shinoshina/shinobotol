@@ -57,9 +57,9 @@ func NewPlugin(n string, defaultState string) (p *Plugin) {
 	}
 	return
 }
-func (p *Plugin) OnTick(name string,rule string, task func()) {
+func (p *Plugin) OnTick(name string,schedule tick.Schedule, task func()) {
 
-	ct := tick.NewCronTask(name,rule,task)
+	ct := tick.NewCronTask(name,schedule,task)
 	p.ctm[name] = ct
 
 }

@@ -23,14 +23,12 @@ func Export() (p *route.Plugin) {
 	p.OnMessage("TEST", "all", func(d route.DataMap) {
 		request.SendMessage(d.Message(), d.GroupID())
 	})
-	p.OnMessage("定时任务", "all", func(d route.DataMap) {
 
-		ct := tick.NewCronTask("wuyuzi", "*/5 * * * * *", func() {
+	p.OnMessage("div", "all", func(d route.DataMap) {
+		ct := tick.NewCronTask("sb", tick.Every(1*tick.Day).At("11:58"), func() {
 			request.SendMessage(d.Message(), d.GroupID())
 		})
-
 		ct.Start()
-
 	})
 
 	p.OnTrigger("testload", "testshut", func(d route.DataMap, pluginState string) {
@@ -40,15 +38,6 @@ func Export() (p *route.Plugin) {
 			request.SendMessage("testonshut", d.GroupID())
 		}
 	})
-
-	// p.OnTick("定时任务", func() {
-	// 	timer := time.NewTimer(5 * time.Second)
-	// 	<-timer.C
-	// 	request.SendMessage("定时任务", 1012330112)
-	// })
-	// p.OnBoot(func() {
-	// 	p.StartTask("定时任务")
-	// })
 	return
 
 }
