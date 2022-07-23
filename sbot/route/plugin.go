@@ -35,10 +35,10 @@ func NewPlugin(n string, defaultState string) (p *Plugin) {
 			fmt.Println("nothing happen")
 		} else if p.state == "loaded" {
 			fmt.Println("default handler start")
-			for k, v := range p.ctm {
-				fmt.Println(k + "start")
-				v.Start()
-			}
+			// for k, v := range p.ctm {
+			// 	fmt.Println(k + "start")
+			// 	v.Start()
+			// }
 		}
 	}
 

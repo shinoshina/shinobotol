@@ -85,6 +85,14 @@ docker rm -v containerid
 ### 内置功能 (都还没做完
 * ##### 学人精加复读机 cosplay 帕拉斯
 * ##### leetcode每日一题提醒 
+	```go
+	p.OnTick("leetcode", tick.Every(1*tick.Day).At("7:00"), SendLeetcodeInfo)
+	p.OnBoot(func() {
+		p.StartTask("leetcode")
+	})
+	p.OnMessage("订阅每日一题","all",subscribe)
+	p.OnMessage("取消订阅力扣","all",unsubscribe)
+	```
 * ##### 不可以sese（其实可以
 * ##### shinobu语音包！ （从副音轨里裁的
 * ##### bilibili 直播推送
