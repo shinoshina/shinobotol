@@ -99,5 +99,10 @@ docker rm -v containerid
 * ##### 不可以sese（其实可以
 * ##### shinobu语音包！ （从副音轨里裁的
 * ##### bilibili 直播推送
+	```go
+    关注永雏塔菲喵
+	p.OnMessage(`^关注主播喵:(?P<mid>.*)`, "regex", subscribe)
+	p.OnMessage(`^取关了喵:(?P<mid>.*)`, "regex", unsubscribe)
+	```
 ### TO NOT DO  :heart_eyes:
 * ##### 就不写
