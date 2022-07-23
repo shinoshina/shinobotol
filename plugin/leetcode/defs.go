@@ -6,7 +6,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"shinobot/sbot/repo/datas"
 	"shinobot/sbot/request"
+	"shinobot/sbot/route"
+	"strconv"
 )
 
 var (
@@ -14,7 +17,26 @@ var (
 	method = "POST"
 	purl   = "https://leetcode.cn/problems/"
 )
+var (
+	subscribeList []float64
+	db         *datas.Db
+)
 
+func init() {
+
+	db = datas.CreateDb("/home/shinoshina/gocode/src/gocqserver/assets/leetcode")
+	subscribeList = make([]float64, 0)
+	db.IterateAll(func(key, value string) {
+		groupid, err := strconv.ParseFloat(key, 64)
+		if err != nil {
+			fmt.Println(err)
+		} else {
+			fmt.Println("KEY", key, "VALUE", value)
+			subscribeList = append(subscribeList, groupid)
+		}
+	})
+	fmt.Println("submit list: ",subscribeList)
+}
 func getDailyName() (name string, id string) {
 	queryMap := map[string]interface{}{
 		"operationName": "questionOfToday",
@@ -52,7 +74,7 @@ func getDailyName() (name string, id string) {
 	id = qn.Data.TodayRecord[0].Question.QuestionFrontendID
 	return
 }
-func dailyQuestionInfo() {
+func dailyQuestionInfo()string {
 
 	name, _ := getDailyName()
 	qu := "\"" + name + "\""
@@ -75,7 +97,7 @@ func dailyQuestionInfo() {
 	res, err := client.Do(req)
 	if err != nil {
 		fmt.Println(err)
-		return
+		return ""
 	}
 	defer res.Body.Close()
 
@@ -85,13 +107,50 @@ func dailyQuestionInfo() {
 	json.Unmarshal(body, &qinfo)
 
 	tags := ""
-	for _,v := range qinfo.Data.Question.TopicTags {
+	for _, v := range qinfo.Data.Question.TopicTags {
 		tags += v.TranslatedName
 		tags += " "
 	}
-	message := "今日题目: "+qinfo.Data.Question.TranslatedTitle + "\n"+  
-	           "难度: "+qinfo.Data.Question.Difficulty + "\n" +
-               "tags: " + tags + "\n" +
-			   "详情这里哦: " + purl + name + "/"
-	request.SendMessage(message, 757663915)
+	message := "哦哈哟！" + "\n" + 
+	    "今日题目: " + qinfo.Data.Question.TranslatedTitle + "\n" +
+		"难度: " + qinfo.Data.Question.Difficulty + "\n" +
+		"tags: " + tags + "\n" +
+		"详情这里哦: " + purl + name + "/"
+	return message
+}
+func subscribe(d route.DataMap) {
+	idstr := Float64toString(d.GroupID())
+	if db.Has(idstr) {
+		request.SendMessage("不可以！！！！！", d.GroupID())
+	} else {
+		subscribeList = append(subscribeList, d.GroupID())
+		db.Put(idstr, "useless")
+		request.SendMessage("订阅成功", d.GroupID())
+	}
+}
+func unsubscribe(d route.DataMap){
+	idstr := Float64toString(d.GroupID())
+	if db.Has(idstr){
+		request.SendMessage("干嘛取消！！?",d.GroupID())
+		db.Delete(idstr)
+	}else{
+		request.SendMessage("你订阅了吗[CQ:face,id=11][CQ:face,id=11]",d.GroupID())
+	}
+
+}
+
+func SendLeetcodeInfo(){
+	msg := dailyQuestionInfo()
+	for _,v := range subscribeList{
+		request.SendMessage(msg,v)
+	}
+}
+func Float64toString(a float64) string {
+	s := strconv.FormatFloat(a, 'f', -1, 64)
+	fmt.Println(s)
+	return s
+}
+func InttoString(a int) string {
+	fmt.Println("int", a)
+	return strconv.Itoa(a)
 }
