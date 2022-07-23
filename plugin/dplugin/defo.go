@@ -2,18 +2,22 @@ package dplugin
 
 import (
 	"fmt"
-	"shinobot/sbot/pool/data"
+	"shinobot/sbot/repo/datas"
 	"shinobot/sbot/request"
 	"shinobot/sbot/route"
 )
-
+var(
+	db *datas.Db
+)
 var (
 	gloabalMessageForRepeat       = []string{"nihao", "test2", "test3", "baka"}
 	gloabalMessageForLearning     = []string{"nihao", "test2", "test3", "baka"}
 	messageCounterForRepeat   int = 0
 	messageCounterForLearning int = 0
 )
-
+func init(){
+	db = datas.CreateDb("/home/shinoshina/gocode/src/gocqserver/assets/default/dialog")
+}
 
 func ResetGlobalMessage(){
 
@@ -25,7 +29,7 @@ func NormalMessageHandler(d route.DataMap) {
 
 	msg := d["raw_message"].(string)
 	group_id := d["group_id"].(float64)
-	answerOk, answer := data.Find(msg)
+	answerOk, answer := db.Get(msg)
 	repeatOk := Check(msg)
 	learnOk := CheckLearning(msg)
 
@@ -37,7 +41,8 @@ func NormalMessageHandler(d route.DataMap) {
 		request.SendMessage(msg,group_id)
 	} else if learnOk {
 		fmt.Println("learn!")
-		data.Repos(gloabalMessageForLearning[0], gloabalMessageForLearning[1])
+		//data.Repos(gloabalMessageForLearning[0], gloabalMessageForLearning[1])
+		db.Put(gloabalMessageForLearning[0],gloabalMessageForLearning[1])
 		request.SendMessage(msg,group_id)
 	}
 

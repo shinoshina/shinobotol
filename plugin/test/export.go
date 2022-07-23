@@ -5,7 +5,6 @@ import (
 	"shinobot/sbot/route"
 	"shinobot/sbot/tick"
 )
-
 func Export() (p *route.Plugin) {
 	p = route.NewPlugin("test", "loaded")
 	p.OnMessage("multi plugin test", "part", func(d route.DataMap) {

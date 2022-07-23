@@ -13,6 +13,7 @@ import (
 )
 func main(){
 
+	// i wanna option
 	a := sbot.NewBot()
 
 	a.LoadPlugin(dplugin.Export())

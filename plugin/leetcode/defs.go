@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"shinobot/sbot/request"
-	"shinobot/sbot/route"
 )
 
 var (
@@ -53,7 +52,7 @@ func getDailyName() (name string, id string) {
 	id = qn.Data.TodayRecord[0].Question.QuestionFrontendID
 	return
 }
-func dailyQuestionInfo(d route.DataMap) {
+func dailyQuestionInfo() {
 
 	name, _ := getDailyName()
 	qu := "\"" + name + "\""
@@ -94,5 +93,5 @@ func dailyQuestionInfo(d route.DataMap) {
 	           "难度: "+qinfo.Data.Question.Difficulty + "\n" +
                "tags: " + tags + "\n" +
 			   "详情这里哦: " + purl + name + "/"
-	request.SendMessage(message, d.GroupID())
+	request.SendMessage(message, 757663915)
 }
