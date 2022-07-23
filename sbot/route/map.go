@@ -1,7 +1,6 @@
 package route
 
 import (
-	"fmt"
 	"regexp"
 	"shinobot/sbot/request"
 	"strings"
@@ -75,7 +74,7 @@ func (ms *MessageSet) handle(d DataMap) {
 				ms.mr[key](d)
 				return
 			} else {
-				fmt.Println("here round no match")
+
 			}
 		}
 	}

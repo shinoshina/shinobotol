@@ -57,12 +57,15 @@ p.OnTrigger("testload","testshut",func(d route.DataMap, pluginState string) {
 	}
 })
 ```
-初启时/重启时钩子
+启动时钩子
 ```go
-//插件初启/重启时启动定时任务，卸载时自动结束任务
+//启动时开启定时任务，卸载时自动结束任务
 p.OnBoot(func() {
 	p.StartTask("定时任务")
 })
+//ps : 初起时在bot收到第一条消息后每个plugin的onboot才会被调用
+// 所以除了在init中初始化数据，在onboot中写也可以
+// 因为 是伪卸载，所以plugin中定义的全局变量并不会被清除，再次加载插件仍可用，所以不用再ontrigger中注册同样的启动函数
 ```
 ### 半成品
 ```

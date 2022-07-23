@@ -5,52 +5,169 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"shinobot/sbot/repo/datas"
 	"shinobot/sbot/request"
 	"shinobot/sbot/route"
-	"sync"
+	"strconv"
+	"strings"
 	"time"
 )
 
+// 由于leveldb不支持list格式，只能把多个grouip存在一个byte slice中
+// 或者用链式的结构？不过那样很乱
+// 至于为啥用leveldb不用关系型，因为sql配置好麻烦，leveldb开箱即用！！
 var (
-	url                = "http://api.bilibili.com/x/space/acc/info"
-	a   map[string]int = make(map[string]int)
+	url           = "http://api.bilibili.com/x/space/acc/info"
+	subscribeList map[string]([]float64)
+	state         map[string]int
 
-	mutex sync.Mutex
+	db *datas.Db
 )
 
-func getUerInfo(mid string) (status int) {
+const (
+	ONSTREAMING int = 1
+	OFFLINE     int = 0
+)
 
-	arl := url + "?mid=" + mid
-	resp, err := http.Get(arl)
-	if err != nil {
-		fmt.Println(err)
+func init() {
+	db = datas.CreateDb("/home/shinoshina/gocode/src/gocqserver/assets/bilibili")
+	subscribeList = make(map[string][]float64)
+	state = make(map[string]int)
+	db.IterateAll(func(key, value string) {
+		subscribeList[key] = ListToGroupId(value)
+		state[key] = OFFLINE
+	})
+	fmt.Println(subscribeList, state)
+}
+func ListToGroupId(list string) []float64 {
+	flist := make([]float64, 0)
+	gslist := strings.Split(list, ":")
+	fmt.Println("glist", gslist)
+	for _, v := range gslist {
+		id, err := strconv.ParseFloat(v, 64)
+		if err != nil {
+			fmt.Println(err)
+		} else {
+			flist = append(flist, id)
+		}
+
 	}
-	defer resp.Body.Close()
+	return flist
+}
+func checkStates(d route.DataMap) {
+	checkState()
+}
+func checkState() {
 
-	body, _ := ioutil.ReadAll(resp.Body)
+	request.SendMessage("jijijji?", 1012330112)
+	var arl string
+	for k, v := range state {
 
-	var ui userInfo
-	json.Unmarshal(body, &ui)
-	fmt.Println(ui.Data.LiveRoom.LiveStatus)
-	return ui.Data.LiveRoom.LiveStatus
+		arl = url + "?mid=" + k
+		resp, err := http.Get(arl)
+		if err != nil {
+			fmt.Println(err)
+		}
+		defer resp.Body.Close()
+
+		body, _ := ioutil.ReadAll(resp.Body)
+		fmt.Println(string(body))
+
+		var ui userInfo
+		json.Unmarshal(body, &ui)
+		status := ui.Data.LiveRoom.LiveStatus
+		fmt.Println("status: ", status)
+		fmt.Println("c:", v)
+		if v^status == 1 {
+			state[k] = status
+			var msg string
+			if status == ONSTREAMING {
+				msg = "本群订阅主播: " + ui.Data.Name + " 已开播\n" +
+					ui.Data.LiveRoom.Title + "\n" +
+					"[CQ:image,file="+ui.Data.LiveRoom.Cover+"]" + "\n" +
+					ui.Data.LiveRoom.URL
+			} else if status == OFFLINE {
+				msg = "本群订阅主播: " + ui.Data.Name + " 已下播\n"
+			}
+			for _, v := range subscribeList[k] {
+				request.SendMessage(msg, v)
+			}
+		}
+		timer := time.NewTimer(1 * time.Second)
+		<-timer.C
+		timer.Stop()
+	}
 
 }
-
-func Subscribe(d route.DataMap) {
+func subscribe(d route.DataMap) {
 
 	vmap := d["group_value"].(map[string](string))
 	mid := vmap["mid"]
-	a[mid] = getUerInfo(mid)
-	fmt.Println(a[mid])
-	request.SendMessage(mid, d.GroupID())
-}
-func Tick() {
-	timer := time.NewTimer(2 * time.Second)
-	<-timer.C
-	mutex.Lock()
-	for k, _ := range a {
-		fmt.Println(k + "locking")
-		request.SendMessage("room: "+k, 1012330112)
+
+	if _, ok := subscribeList[mid]; ok {
+		subscribeList[mid] = append(subscribeList[mid], d.GroupID())
+	} else {
+		subscribeList[mid] = make([]float64, 1)
+		subscribeList[mid][0] = d.GroupID()
 	}
-	mutex.Unlock()
+
+	if _, ok := state[mid]; !ok {
+		state[mid] = 0
+	}
+
+	ok, list := db.Get(mid)
+	fmt.Println("LIST", list)
+	sid := strconv.FormatFloat(d.GroupID(), 'f', -1, 64)
+	if ok {
+		if !strings.Contains(list, sid) {
+			list += (sid + ":")
+			fmt.Println("LIST", list)
+			db.Put(mid, list)
+		} else {
+			request.SendMessage("不准重复订阅[CQ:face,id=11][CQ:face,id=11][CQ:face,id=11]", d.GroupID())
+			return
+		}
+	} else {
+		db.Put(mid, sid+":")
+	}
+
+	request.SendMessage("订阅成功", d.GroupID())
+}
+func unsubscribe(d route.DataMap) {
+
+	vmap := d["group_value"].(map[string](string))
+	mid := vmap["mid"]
+	find := false
+	if _, ok := subscribeList[mid]; ok {
+
+		for i, v := range subscribeList[mid] {
+			if v == d.GroupID() {
+				find = true
+				_, s := db.Get(mid)
+				sl := strings.Split(s, strconv.FormatFloat(d.GroupID(), 'f', -1, 64)+":")
+
+				if i == len(subscribeList[mid])-1 && i != 0 {
+					subscribeList[mid] = subscribeList[mid][:len(subscribeList[mid])-1]
+					db.Put(mid, sl[0])
+				} else if i != 0 {
+					subscribeList[mid] = append(subscribeList[mid][:i], subscribeList[mid][i+1:]...)
+					db.Put(mid, sl[0]+sl[1])
+				} else if i == 0 && len(subscribeList[mid]) != 1 {
+					subscribeList[mid] = subscribeList[mid][1:]
+					db.Put(mid, sl[1])
+				} else if i == 0 && len(subscribeList[mid]) == 1 {
+					delete(subscribeList, mid)
+					delete(state, mid)
+					db.Delete(mid)
+				}
+			}
+
+		}
+		if !find {
+			request.SendMessage("找不到你[CQ:face,id=11][CQ:face,id=11][CQ:face,id=11]", d.GroupID())
+		}
+	} else {
+		request.SendMessage("你就没订阅[CQ:face,id=11][CQ:face,id=11][CQ:face,id=11]", d.GroupID())
+	}
+
 }

@@ -51,7 +51,6 @@ func NewPlugin(n string, defaultState string) (p *Plugin) {
 				p.ShutDownAllCronTask()
 			} else if pluginState == "loaded" {
 				request.SendMessage(p.name+"onloaded", d.GroupID())
-				p.bh()
 			}
 		},
 	}
@@ -70,7 +69,6 @@ func (p *Plugin) OnTrigger(keyLoad string, keyShut string, hook func(d DataMap, 
 		if pluginState == "shut" {
 			p.ShutDownAllCronTask()
 		} else if pluginState == "loaded" {
-			p.bh()
 		}
 		hook(d, pluginState)
 	}
