@@ -16,7 +16,7 @@ var (
 	messageCounterForLearning int = 0
 )
 func init(){
-	db = datas.CreateDb("/home/shinoshina/gocode/src/gocqserver/assets/default/dialog")
+	db = datas.CreateDb("assets/default/dialog")
 }
 
 func ResetGlobalMessage(){

@@ -24,7 +24,7 @@ var (
 
 func init() {
 
-	db = datas.CreateDb("/home/shinoshina/gocode/src/gocqserver/assets/leetcode")
+	db = datas.CreateDb("assets/leetcode")
 	subscribeList = make([]float64, 0)
 	db.IterateAll(func(key, value string) {
 		groupid, err := strconv.ParseFloat(key, 64)

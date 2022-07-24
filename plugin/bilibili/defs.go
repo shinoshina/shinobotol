@@ -30,7 +30,7 @@ const (
 )
 
 func init() {
-	db = datas.CreateDb("/home/shinoshina/gocode/src/gocqserver/assets/bilibili")
+	db = datas.CreateDb("assets/bilibili")
 	subscribeList = make(map[string][]float64)
 	state = make(map[string]int)
 	db.IterateAll(func(key, value string) {
@@ -144,8 +144,9 @@ func unsubscribe(d route.DataMap) {
 			if v == d.GroupID() {
 				find = true
 				_, s := db.Get(mid)
+				fmt.Println("S ",s)
 				sl := strings.Split(s, strconv.FormatFloat(d.GroupID(), 'f', -1, 64)+":")
-
+                fmt.Println("SL ",sl)
 				if i == len(subscribeList[mid])-1 && i != 0 {
 					subscribeList[mid] = subscribeList[mid][:len(subscribeList[mid])-1]
 					db.Put(mid, sl[0])
@@ -160,6 +161,7 @@ func unsubscribe(d route.DataMap) {
 					delete(state, mid)
 					db.Delete(mid)
 				}
+				fmt.Println("subscribe list ",subscribeList[mid])
 			}
 
 		}
