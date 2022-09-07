@@ -9,6 +9,7 @@ import (
 type Plugin struct {
 	ms      *MessageSet
 	es      EventSet
+	bl      *blacklist
 	bh      func()
 	name    string
 	trigger Trigger
@@ -27,6 +28,7 @@ func NewPlugin(n string, defaultState string) (p *Plugin) {
 	p.name = n
 	p.ms = NewMessageSet()
 	p.es = NewEventSet()
+	p.bl = NewBlackList()
 	p.state = defaultState
 	p.ctm = make(map[string]*tick.CronTask)
 	p.bh = func() {
@@ -35,10 +37,6 @@ func NewPlugin(n string, defaultState string) (p *Plugin) {
 			fmt.Println("nothing happen")
 		} else if p.state == "loaded" {
 			fmt.Println("default handler start")
-			// for k, v := range p.ctm {
-			// 	fmt.Println(k + "start")
-			// 	v.Start()
-			// }
 		}
 	}
 
@@ -56,9 +54,9 @@ func NewPlugin(n string, defaultState string) (p *Plugin) {
 	}
 	return
 }
-func (p *Plugin) OnTick(name string,schedule tick.Schedule, task func()) {
+func (p *Plugin) OnTick(name string, schedule tick.Schedule, task func()) {
 
-	ct := tick.NewCronTask(name,schedule,task)
+	ct := tick.NewCronTask(name, schedule, task)
 	p.ctm[name] = ct
 
 }
@@ -74,6 +72,16 @@ func (p *Plugin) OnTrigger(keyLoad string, keyShut string, hook func(d DataMap, 
 	}
 }
 func (p *Plugin) OnMessage(r string, mode string, handler func(d DataMap)) {
+	if p.bl.blf {
+		handler = func(d DataMap) {
+			if v, ok := p.bl.blm[d.GroupID()]; ok {
+				if v {
+					return
+				}
+			}
+			handler(d)
+		}
+	}
 	p.ms.onMessage(r, mode, handler)
 }
 func (p *Plugin) OnEvent(ev string, handler func(d DataMap)) {

@@ -746,3 +746,13 @@
 09:28:28.772731 version@stat F·[2] S·382B[382B] Sc·[0.50]
 09:28:28.873667 db@janitor F·4 G·0
 09:28:28.873732 db@open done T·101.9967ms
+=============== Jul 27, 2022 (CST) ===============
+13:58:20.292108 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+13:58:20.299667 version@stat F·[2] S·382B[382B] Sc·[0.50]
+13:58:20.299690 db@open opening
+13:58:20.299722 journal@recovery F·1
+13:58:20.300280 journal@recovery recovering @166
+13:58:20.429779 memdb@flush created L0@168 N·1 S·124B "nihaoa,v7":"nihaoa,v7"
+13:58:20.430838 version@stat F·[3] S·506B[506B] Sc·[0.75]
+13:58:20.827072 db@janitor F·5 G·0
+13:58:20.827192 db@open done T·527.4929ms
