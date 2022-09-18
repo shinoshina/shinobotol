@@ -1,7 +1,7 @@
 package datas
 
 import (
-	"fmt"
+	"shinobot/sbot/logger"
 
 	"github.com/syndtr/goleveldb/leveldb"
 )
@@ -28,7 +28,7 @@ func (db *Db) Get(key string) (bool, string) {
 	value, err := db.db.Get([]byte(key), nil)
 	if err != nil {
 		if err == leveldb.ErrNotFound {
-			fmt.Printf("key: %v not found\n", key)
+			logger.Infof("key: %v not found\n", key)
 			return false, ""
 		} else {
 			panic(err)
@@ -45,10 +45,10 @@ func (db *Db) IterateAll(fn func(key string, value string)) {
 	iter.Release()
 }
 func (db *Db) Put(key string, value string) {
-	fmt.Println("put:",key,value)
+	logger.Infof("put:",key,value)
 	err := db.db.Put([]byte(key), []byte(value), nil)
     if err != nil{
-		fmt.Println("put error",err)
+		logger.Infof("put error",err)
 	}
 }
 func (db *Db) Delete(key string) {
@@ -57,7 +57,7 @@ func (db *Db) Delete(key string) {
 func (db *Db) Has(key string) bool {
 	ok, err := db.db.Has([]byte(key), nil)
 	if err != nil {
-		fmt.Println(err)
+		logger.Errorf("%v",err)
 		return false
 	} else {
 		return ok

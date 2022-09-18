@@ -1,9 +1,9 @@
 ## Hello Shinobu
 自用bot到框架转型中
 
-### 基于gocqserver的服务端框架（算是吧。。。
+### 基于gocq的服务端框架
 
-初始化bot，加载插件并启动 （当然是静态导入啦。。。
+初始化bot，加载插件并启动 （当然是静态导入啦
 ```go
 func main(){
 	a := sbot.NewBot()
@@ -68,24 +68,8 @@ p.OnBoot(func() {
 // 因为 是伪卸载，所以plugin中定义的全局变量并不会被清除，再次加载插件仍可用，所以不用再ontrigger中注册同样的启动函数
 ```
 ### 半成品
-```
-docker pull shinoshina/shinobot
-```
-运行
-```
-docker run -idt shinoshina/shinobot /bin/bash /root/start.sh
-```
-查看容器
-```
-docker ps -a
-```
-停止运行并删除
-```
-docker stop containerid 
-docker rm -v containerid
-```
 不给你玩
-### 内置功能 (都还没做完
+### 内置功能
 * ##### 学人精加复读机 cosplay 帕拉斯
 * ##### leetcode每日一题提醒 
 	```go

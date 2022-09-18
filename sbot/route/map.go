@@ -20,7 +20,7 @@ type (
 
 func DefaultHandler(d DataMap) {
 	gi := d["group_id"].(float64)
-	request.SendMessage("gei ye pa!", gi)
+	request.SendMessage("pi", gi)
 }
 func NewMessageSet() (ms *MessageSet) {
 	ms = new(MessageSet)

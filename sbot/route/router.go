@@ -1,6 +1,8 @@
 package route
 
-import "fmt"
+import (
+	"shinobot/sbot/logger"
+)
 
 type Router struct {
 	ms     *MessageSet
@@ -14,7 +16,7 @@ func (r *Router) LoadPlugin(p *Plugin) {
 	if p.state == "loaded" {
 		r.load(p)
 	} else if p.state == "shut" {
-		fmt.Println("不加载")
+		logger.Info("不加载")
 	}
 
 	keyload := p.trigger.kload
@@ -26,7 +28,7 @@ func (r *Router) LoadPlugin(p *Plugin) {
 			p.state = "loaded"
 			p.trigger.th(d, "loaded")
 		} else {
-			fmt.Println("乌鱼子111")
+			logger.Info("乌鱼子111")
 		}
 	}
 	r.ms.ma[keyshut] = func(d DataMap) {
@@ -35,7 +37,7 @@ func (r *Router) LoadPlugin(p *Plugin) {
 			p.state = "shut"
 			p.trigger.th(d, "shut")
 		} else {
-			fmt.Println("乌鱼子222")
+			logger.Info("乌鱼子222")
 		}
 	}
 
@@ -97,9 +99,9 @@ func (r *Router) Handle(d DataMap) {
 				p.bh()
 			}
 			r.booted = true
-			fmt.Println("plugin first booted")
+			logger.Info("plugin first booted")
 		}
-		fmt.Println("meta_event : check living")
+		logger.Info("meta_event : check living")
 	} else if pt == "message" {
 		r.ms.handle(d)
 	} else if pt == "notice" {
@@ -114,8 +116,8 @@ func (r *Router) Handle(d DataMap) {
 	} else {
 
 	}
-	fmt.Println(pt)
-	fmt.Println(pmt)
-	fmt.Println(pst)
+	logger.Info(pt)
+	logger.Info(pmt)
+	logger.Info(pst)
 
 }

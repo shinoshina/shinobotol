@@ -1,7 +1,7 @@
 package sbot
 
 import (
-	"fmt"
+	"shinobot/sbot/logger"
 	"shinobot/sbot/route"
 	"time"
 
@@ -19,7 +19,7 @@ func NewBot() (sb *Sbot) {
 	sb.r = route.NewRouter()
 	sb.e = gin.Default()
 	sb.bh = func() {
-		fmt.Println("免费啦啦啦啦啦")
+		logger.Info("免费啦啦啦啦啦")
 	}
 	return
 }
