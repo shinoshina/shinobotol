@@ -9,8 +9,8 @@ import (
 )
 
 type Sbot struct {
-	r     *route.Router
-	e     *gin.Engine
+	r  *route.Router
+	e  *gin.Engine
 	bh func()
 }
 
@@ -33,7 +33,7 @@ func (sb *Sbot) mainHandler(c *gin.Context) {
 }
 func (sb *Sbot) Run() {
 	sb.e.POST("/", sb.mainHandler)
-	go setTimeval(5,sb.bh)
+	go setTimeval(5, sb.bh)
 	sb.e.Run(":5701")
 }
 
