@@ -1,7 +1,7 @@
 package route
 
 import (
-	"fmt"
+	"shinobot/sbot/logger"
 	"shinobot/sbot/request"
 	"shinobot/sbot/tick"
 )
@@ -22,7 +22,6 @@ type Trigger struct {
 	kshut string
 	th    func(d DataMap, state string)
 }
-
 func NewPlugin(n string, defaultState string) (p *Plugin) {
 	p = new(Plugin)
 	p.name = n
@@ -32,11 +31,11 @@ func NewPlugin(n string, defaultState string) (p *Plugin) {
 	p.state = defaultState
 	p.ctm = make(map[string]*tick.CronTask)
 	p.bh = func() {
-		fmt.Println("plugin: " + p.name + " onboot\n" + "initial state: " + p.state)
+		logger.Info("plugin: " + p.name + " onboot\n" + "initial state: " + p.state)
 		if p.state == "shut" {
-			fmt.Println("nothing happen")
+			logger.Info("nothing happen")
 		} else if p.state == "loaded" {
-			fmt.Println("default handler start")
+			logger.Info("default handler start")
 		}
 	}
 
@@ -90,11 +89,11 @@ func (p *Plugin) OnEvent(ev string, handler func(d DataMap)) {
 
 func (p *Plugin) OnBoot(handler func()) {
 	p.bh = func() {
-		fmt.Println("plugin: " + p.name + " onboot\n" + "initial state: " + p.state)
+		logger.Info("plugin: " + p.name + " onboot\n" + "initial state: " + p.state)
 		if p.state == "shut" {
-			fmt.Println("nothing happen")
+			logger.Info("nothing happen")
 		} else if p.state == "loaded" {
-			fmt.Println("handler start")
+			logger.Info("handler start")
 			handler()
 		}
 	}

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"shinobot/sbot/logger"
 	"shinobot/sbot/repo/datas"
 	"shinobot/sbot/request"
 	"shinobot/sbot/route"
@@ -31,11 +32,11 @@ func init() {
 		if err != nil {
 			fmt.Println(err)
 		} else {
-			fmt.Println("KEY", key, "VALUE", value)
+			logger.Info("KEY", key, "VALUE", value)
 			subscribeList = append(subscribeList, groupid)
 		}
 	})
-	fmt.Println("submit list: ",subscribeList)
+	logger.Info("submit list: ",subscribeList)
 }
 func getDailyName() (name string, id string) {
 	queryMap := map[string]interface{}{
@@ -69,7 +70,7 @@ func getDailyName() (name string, id string) {
 
 	var qn questionName
 	json.Unmarshal(body, &qn)
-	fmt.Println(qn)
+	logger.Info(qn)
 	name = qn.Data.TodayRecord[0].Question.QuestionTitleSlug
 	id = qn.Data.TodayRecord[0].Question.QuestionFrontendID
 	return

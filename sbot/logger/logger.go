@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path"
 	"runtime"
 	"strconv"
 	"strings"
@@ -21,7 +22,7 @@ const (
 	FATAL
 )
 const (
-	DEBUGC = 32 //RED
+	DEBUGC = 34 //RED
 	INFOC  = 32
 	WARNC  = 36
 	ERRORC = 33
@@ -59,10 +60,20 @@ type Logger struct {
 type Option func(*Logger)
 
 func New(option ...Option) *Logger {
-	l := new(Logger)
+	l := &Logger{
+		fileno: false,
+		inciseno: false,
+
+		format: LlongFile | Ldate,
+		output: os.Stderr,
+	}
 
 	for _, o := range option {
 		o(l)
+	}
+
+	if l.inciseno && l.fileno {
+		Fatal("config dismatch")
 	}
 
 	return l
@@ -109,8 +120,9 @@ func (l *Logger) Output(level logLevel, s string) {
 		ctime = time.Unix(timeUnix, 0).Format("2006-01-02 15:04:05") + " "
 	}
 	if l.format&(LshortFile|LlongFile) != 0 {
-		_, path, line, _ := runtime.Caller(1)
-		location = fmt.Sprintf("[%s:%d] ", path, line)
+		_, file, line, _ := runtime.Caller(3)
+		fileName := path.Base(file)
+		location = fmt.Sprintf("[%s:%d] ", fileName, line)
 	}
 	l.mu.Lock()
 	defer l.mu.Unlock()

@@ -1,7 +1,7 @@
 package dplugin
 
 import (
-	"fmt"
+	"shinobot/sbot/logger"
 	"shinobot/sbot/repo/datas"
 	"shinobot/sbot/request"
 	"shinobot/sbot/route"
@@ -34,13 +34,13 @@ func NormalMessageHandler(d route.DataMap) {
 	learnOk := CheckLearning(msg)
 
 	if answerOk {
-		fmt.Printf("find answer! %v\n",answer)
+		logger.Info("find answer! %v\n",answer)
 		request.SendMessage(answer,group_id)
 	} else if repeatOk {
-		fmt.Println("repeat!")
+		logger.Info("repeat!")
 		request.SendMessage(msg,group_id)
 	} else if learnOk {
-		fmt.Println("learn!")
+		logger.Info("learn!")
 		//data.Repos(gloabalMessageForLearning[0], gloabalMessageForLearning[1])
 		db.Put(gloabalMessageForLearning[0],gloabalMessageForLearning[1])
 		request.SendMessage(msg,group_id)

@@ -116,8 +116,6 @@ func (r *Router) Handle(d DataMap) {
 	} else {
 
 	}
-	logger.Info(pt)
-	logger.Info(pmt)
-	logger.Info(pst)
+	logger.Info(pt," ", pmt," " ,pst)
 
 }

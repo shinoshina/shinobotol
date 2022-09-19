@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"shinobot/sbot/logger"
 	"shinobot/sbot/repo/datas"
 	"shinobot/sbot/request"
 	"shinobot/sbot/route"
@@ -37,12 +38,12 @@ func init() {
 		subscribeList[key] = ListToGroupId(value)
 		state[key] = OFFLINE
 	})
-	fmt.Println(subscribeList, state)
+	logger.Info(subscribeList, state)
 }
 func ListToGroupId(list string) []float64 {
 	flist := make([]float64, 0)
 	gslist := strings.Split(list, ":")
-	fmt.Println("glist", gslist)
+	logger.Info("glist", gslist)
 	for _, v := range gslist {
 		id, err := strconv.ParseFloat(v, 64)
 		if err != nil {
@@ -71,13 +72,13 @@ func checkState() {
 		defer resp.Body.Close()
 
 		body, _ := ioutil.ReadAll(resp.Body)
-		fmt.Println(string(body))
+		logger.Info(string(body))
 
 		var ui userInfo
 		json.Unmarshal(body, &ui)
 		status := ui.Data.LiveRoom.LiveStatus
-		fmt.Println("status: ", status)
-		fmt.Println("c:", v)
+		logger.Info("status: ", status)
+		logger.Info("c:", v)
 		if v^status == 1 {
 			state[k] = status
 			var msg string
@@ -116,12 +117,12 @@ func subscribe(d route.DataMap) {
 	}
 
 	ok, list := db.Get(mid)
-	fmt.Println("LIST", list)
+	logger.Info("LIST", list)
 	sid := strconv.FormatFloat(d.GroupID(), 'f', -1, 64)
 	if ok {
 		if !strings.Contains(list, sid) {
 			list += (sid + ":")
-			fmt.Println("LIST", list)
+			logger.Info("LIST", list)
 			db.Put(mid, list)
 		} else {
 			request.SendMessage("不准重复订阅[CQ:face,id=11][CQ:face,id=11][CQ:face,id=11]", d.GroupID())
@@ -161,7 +162,7 @@ func unsubscribe(d route.DataMap) {
 					delete(state, mid)
 					db.Delete(mid)
 				}
-				fmt.Println("subscribe list ",subscribeList[mid])
+				logger.Info("subscribe list ",subscribeList[mid])
 			}
 
 		}
