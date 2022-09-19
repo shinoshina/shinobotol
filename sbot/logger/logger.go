@@ -121,8 +121,10 @@ func (l *Logger) Output(level logLevel, s string) {
 	}
 	if l.format&(LshortFile|LlongFile) != 0 {
 		_, file, line, _ := runtime.Caller(3)
-		fileName := path.Base(file)
-		location = fmt.Sprintf("[%s:%d] ", fileName, line)
+		if l.format & LshortFile != 0{ 
+			file = path.Base(file)
+		}
+		location = fmt.Sprintf("[%s:%d] ", file, line)
 	}
 	l.mu.Lock()
 	defer l.mu.Unlock()
