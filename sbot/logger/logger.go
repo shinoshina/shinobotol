@@ -32,9 +32,10 @@ var Color = [5]int{DEBUGC, INFOC, WARNC, ERRORC, FATALC}
 var Prefix = [5]string{"[DEBUG] ", "[INFO] ", "[WARN] ", "[ERROR] ", "[FATAL] "}
 
 var defLogger = &Logger{
-	output: os.Stderr,
-	format: LshortFile | Ldate,
-	fileno: false,
+	output:   os.Stderr,
+	format:   LshortFile | Ldate,
+	fileno:   false,
+	inciseno: false,
 }
 
 const (
@@ -44,10 +45,11 @@ const (
 )
 
 type Logger struct {
-	mu       sync.Mutex
-	output   io.Writer
-	format   int
-	timeout  time.Time
+	mu     sync.Mutex
+	output io.Writer
+	format int
+
+	size     int
 	fileno   bool
 	inciseno bool
 
@@ -67,9 +69,10 @@ func New(option ...Option) *Logger {
 }
 func NewDefault() Logger {
 	return Logger{
-		output: os.Stdout,
-		format: LshortFile | Ldate,
-		fileno: false,
+		output:   os.Stderr,
+		format:   LshortFile | Ldate,
+		fileno:   false,
+		inciseno: false,
 	}
 }
 func WithFormat(flag int) Option {
@@ -82,15 +85,18 @@ func WithOutPut(output io.Writer) Option {
 		l.output = output
 		if output != os.Stderr || output != os.Stdout {
 			l.fileno = true
-			l.currentFileBytes = 0
 			l.buffer = make([]byte, 0)
 		}
 	}
 }
-func WithIncise(timeout time.Time) Option {
+func WithIncise(bits int) Option {
 	return func(l *Logger) {
-		l.timeout = timeout
+		if bits <= 10240 {
+			defLogger.Fatalf("incise deadline to low")
+		}
+		l.size = bits
 		l.inciseno = true
+		l.currentFileBytes = 0
 	}
 }
 func (l *Logger) Output(level logLevel, s string) {
@@ -124,10 +130,12 @@ func (l *Logger) Output(level logLevel, s string) {
 	fmt.Println("length: ", len(l.buffer))
 	if len(l.buffer) >= 2000 {
 		l.output.Write(l.buffer)
-		l.currentFileBytes += len(l.buffer)
-		if l.currentFileBytes >= 250 {
-			l.output = newFile(l.output)
-			l.currentFileBytes = 0
+		if l.inciseno {
+			l.currentFileBytes += len(l.buffer)
+			if l.currentFileBytes >= l.size {
+				l.output = newFile(l.output)
+				l.currentFileBytes = 0
+			}
 		}
 		l.buffer = l.buffer[:0]
 	}
