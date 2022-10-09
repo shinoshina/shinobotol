@@ -29,14 +29,16 @@ const (
 	FATALC = 31
 )
 
-var Color = [5]int{DEBUGC, INFOC, WARNC, ERRORC, FATALC}
-var Prefix = [5]string{"[DEBUG] ", "[INFO] ", "[WARN] ", "[ERROR] ", "[FATAL] "}
+var DefaultColor = [5]int{DEBUGC, INFOC, WARNC, ERRORC, FATALC}
+var DefaultPrefix = [5]string{"[DEBUG] ", "[INFO] ", "[WARN] ", "[ERROR] ", "[FATAL] "}
 
 var defLogger = &Logger{
 	output:   os.Stderr,
 	format:   LshortFile | Ldate,
 	fileno:   false,
 	inciseno: false,
+	colors:   DefaultColor,
+	prefixs:  DefaultPrefix,
 }
 
 const (
@@ -56,16 +58,22 @@ type Logger struct {
 
 	buffer           []byte
 	currentFileBytes int
+
+	colors  [5]int
+	prefixs [5]string
 }
 type Option func(*Logger)
 
 func New(option ...Option) *Logger {
 	l := &Logger{
-		fileno: false,
+		fileno:   false,
 		inciseno: false,
 
 		format: LlongFile | Ldate,
 		output: os.Stderr,
+
+		colors:  [5]int{-1, -1, -1, -1, -1},
+		prefixs: [5]string{"", "", "", "", ""},
 	}
 
 	for _, o := range option {
@@ -110,6 +118,26 @@ func WithIncise(bits int) Option {
 		l.currentFileBytes = 0
 	}
 }
+func WithColorsDefault() Option {
+	return func(l *Logger) {
+		l.colors = DefaultColor
+	}
+}
+func WithPrefixsDefault() Option {
+	return func(l *Logger) {
+		l.prefixs = DefaultPrefix
+	}
+}
+func WithColors(colors [5]int) Option {
+	return func(l *Logger) {
+		l.colors = colors
+	}
+}
+func WithPrefixs(prefixs [5]string) Option {
+	return func(l *Logger) {
+		l.prefixs = prefixs
+	}
+}
 func (l *Logger) Output(level logLevel, s string) {
 
 	s += "\n"
@@ -121,7 +149,7 @@ func (l *Logger) Output(level logLevel, s string) {
 	}
 	if l.format&(LshortFile|LlongFile) != 0 {
 		_, file, line, _ := runtime.Caller(3)
-		if l.format & LshortFile != 0{ 
+		if l.format&LshortFile != 0 {
 			file = path.Base(file)
 		}
 		location = fmt.Sprintf("[%s:%d] ", file, line)
@@ -130,14 +158,14 @@ func (l *Logger) Output(level logLevel, s string) {
 	defer l.mu.Unlock()
 
 	if !l.fileno {
-		l.output.Write([]byte(colorConvert(Color[level], Prefix[level]+ctime+location+s)))
+		l.output.Write([]byte(colorConvert(l.colors[level], l.prefixs[level]+ctime+location+s)))
 		return
 	} else if level == DEBUG {
-		os.Stderr.Write([]byte(colorConvert(Color[level], Prefix[level]+ctime+location+s)))
+		os.Stderr.Write([]byte(colorConvert(l.colors[level], l.prefixs[level]+ctime+location+s)))
 		return
 	}
 
-	l.buffer = append(l.buffer, Prefix[level]...)
+	l.buffer = append(l.buffer, l.prefixs[level]...)
 	l.buffer = append(l.buffer, ctime...)
 	l.buffer = append(l.buffer, location...)
 	l.buffer = append(l.buffer, s...)
@@ -156,8 +184,11 @@ func (l *Logger) Output(level logLevel, s string) {
 }
 
 func colorConvert(color int, raw string) (s string) {
-
-	return fmt.Sprintf("\x1b[0;%dm%s\x1b[0m", color, raw)
+	if color != -1 {
+		return fmt.Sprintf("\x1b[0;%dm%s\x1b[0m", color, raw)
+	}else{
+		return raw
+	}
 }
 
 func CurrentTime() (ctime string) {
